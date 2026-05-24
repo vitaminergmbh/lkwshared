@@ -16,6 +16,7 @@ export type {
   Tour,
   TourStop,
   LiveTourStatus,
+  LiveStopStatus,
   HereRouteSegment,
   HereGeocodingResult,
   HereAutosuggestResult,
@@ -29,6 +30,7 @@ export * as TourAPI from './api/tours';
 export * as TourStopAPI from './api/tourStops';
 export * as SettingsAPI from './api/settings';
 export * as DriverAPI from './api/drivers';
+export * as TruckPositionsAPI from './api/truckPositions';
 
 // === Utils ===
 export {
@@ -91,3 +93,6 @@ export type { CostSettings, CostBreakdown, TruckSegment } from './utils/costCalc
 // === Realtime ===
 export { subscribeToTable, unsubscribe } from './realtime';
 export type { RealtimeHandlers, RealtimeEvent } from './realtime';
+
+// === GeoJSON Export ===
+export { buildLocationsGeoJson, buildLocationsGeoJsonString } from './utils/geojsonExport';

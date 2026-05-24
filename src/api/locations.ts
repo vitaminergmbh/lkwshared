@@ -1,13 +1,16 @@
 import { getSupabase } from '../supabase';
-import type { Location, LocationHours } from '../types';
+import type { Location, LocationHours, Coordinates } from '../types';
 
 // === Location CRUD ===
 
-export async function getAllLocations(): Promise<Location[]> {
-  const { data, error } = await getSupabase()
-    .from('locations')
-    .select('*')
-    .order('name');
+/**
+ * Returns active (non-archived) locations by default.
+ * Pass { includeArchived: true } to also include soft-deleted ones.
+ */
+export async function getAllLocations(opts?: { includeArchived?: boolean }): Promise<Location[]> {
+  let query = getSupabase().from('locations').select('*').order('name');
+  if (!opts?.includeArchived) query = query.eq('archived', false);
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
   return data;
 }
@@ -27,13 +30,14 @@ export async function getDepots(): Promise<Location[]> {
     .from('locations')
     .select('*')
     .eq('is_depot', true)
+    .eq('archived', false)
     .order('name');
   if (error) throw new Error(error.message);
   return data;
 }
 
 export async function createLocation(
-  data: Omit<Location, 'id' | 'created_at' | 'updated_at'>
+  data: Omit<Location, 'id' | 'created_at' | 'updated_at' | 'geofence_radius_m' | 'geofence_polygon' | 'archived'> & { geofence_radius_m?: number; geofence_polygon?: Coordinates[] | null }
 ): Promise<Location> {
   const { data: created, error } = await getSupabase()
     .from('locations')
@@ -58,6 +62,30 @@ export async function updateLocation(
   return updated;
 }
 
+/**
+ * Soft-delete: marks the location as archived. Tour history references stay valid.
+ * Use this from the UI for any user-triggered "delete" action.
+ */
+export async function archiveLocation(id: string): Promise<void> {
+  const { error } = await getSupabase()
+    .from('locations')
+    .update({ archived: true })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+export async function unarchiveLocation(id: string): Promise<void> {
+  const { error } = await getSupabase()
+    .from('locations')
+    .update({ archived: false })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Permanently deletes a location row. Will fail if any tour_stop still references it.
+ * Prefer archiveLocation() for normal user operations.
+ */
 export async function deleteLocation(id: string): Promise<void> {
   const { error } = await getSupabase()
     .from('locations')

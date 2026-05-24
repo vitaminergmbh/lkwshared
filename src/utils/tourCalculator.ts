@@ -5,6 +5,20 @@ import { isWithinOpeningHours } from './timeWindows';
 import { DRIVING_TIME_LIMIT_MINUTES, REQUIRED_BREAK_MINUTES } from './constants';
 import { calculateTourCosts, type CostSettings, type CostBreakdown, type TruckSegment } from './costCalculator';
 
+/**
+ * EU driving time / break rules apply only to professional truck drivers.
+ * Vehicles classified as "Transporter" or "Auto" don't fall under § 4 FPersV
+ * regulations, so their driving minutes must NOT add to the cumulative driver
+ * hours and must NOT trigger auto-breaks.
+ *
+ * Categories defined in TRUCK_CATEGORIES: 'LKW' | 'Transporter' | 'Auto' | 'Sonstige'.
+ * Treat 'LKW' and 'Sonstige' as regulated; 'Transporter' and 'Auto' as exempt.
+ */
+function isDrivingTimeRegulated(truck: Truck | null | undefined): boolean {
+  if (!truck) return true; // unknown → conservative default
+  return truck.category !== 'Transporter' && truck.category !== 'Auto';
+}
+
 export interface TourCalculationInput {
   tour: Tour;
   stops: TourStop[];
@@ -28,7 +42,11 @@ export interface TourCalculationResult {
   stops: TourStop[];
   totalDuration: number;   // minutes
   totalDistance: number;    // km
+  /** Sum of drive_time_from_prev across ALL segments (regardless of vehicle category). */
   totalDriveTime: number;  // minutes
+  /** Sum of drive_time_from_prev for segments driven by a regulated vehicle (LKW / Sonstige).
+   *  Used to display the relevant lenkzeit total separately when mixed with car/transporter legs. */
+  totalLkwDriveTime: number;
   costs: CostBreakdown | null;
   /** Auto-break info per stop index (only for stops where break happens during transit) */
   autoBreaks: Record<number, AutoBreakInfo>;
@@ -45,6 +63,7 @@ export function calculateTourSchedule(
       totalDuration: 0,
       totalDistance: 0,
       totalDriveTime: 0,
+      totalLkwDriveTime: 0,
       costs: null,
       autoBreaks: {},
     };
@@ -54,6 +73,7 @@ export function calculateTourSchedule(
   let currentDateTime = createDateTime(tour.date, tour.start_time);
   let cumulativeDriveTime = tour.driver_initial_drive_time;
   let totalDriveTime = 0;
+  let totalLkwDriveTime = 0;
   let totalDistance = 0;
   const autoBreaks: Record<number, AutoBreakInfo> = {};
 
@@ -79,10 +99,8 @@ export function calculateTourSchedule(
   for (let i = 0; i < stops.length; i++) {
     const stop = { ...stops[i]! };
 
-    // Check for truck change at this stop
-    if (stop.truck_id && input.truckMap?.[stop.truck_id]) {
-      activeTruck = input.truckMap[stop.truck_id] ?? null;
-    }
+    // truck_id on this stop means: change AT this stop, used FROM this stop onwards.
+    // The segment TO this stop still uses the previous activeTruck; switch happens AFTER segment processing.
 
     const segmentIndex = hasDepot ? i : i - 1;
     const segment = segmentIndex >= 0 ? segments[segmentIndex] : undefined;
@@ -90,12 +108,15 @@ export function calculateTourSchedule(
     if (segment) {
       const driveMinutes = Math.ceil(segment.duration / 60);
       const distanceKm = segment.length / 1000;
+      const segmentRegulated = isDrivingTimeRegulated(activeTruck);
 
       stop.drive_time_from_prev = driveMinutes;
       stop.distance_from_prev = Math.round(distanceKm * 10) / 10;
+      stop.route_polyline = segment.polyline ?? null;
 
       // Check if previous stop contributed to break time (split-break support)
-      if (i > 0) {
+      // Only relevant when we're tracking driver hours for this segment.
+      if (segmentRegulated && i > 0) {
         const prevStop = updatedStops[i - 1]!;
         if (prevStop.counts_as_break) {
           const standingTime = prevStop.loading_time + prevStop.wait_time;
@@ -106,54 +127,60 @@ export function calculateTourSchedule(
             cumulativeDriveTime = 0;
             accumulatedBreakTime = 0;
           }
-        } else {
-          // Non-break stop: reset accumulated break (split must be consecutive break-stops or auto-breaks)
-          // Actually per EU rules, driving between split parts is allowed, so we keep the accumulation
-          // But a non-break stop with standing time does NOT count toward the 45 min
         }
       }
 
-      // Check if driving break is needed DURING this segment
-      const wouldExceed = cumulativeDriveTime + driveMinutes > DRIVING_TIME_LIMIT_MINUTES;
-      const remainingBeforeLimit = Math.max(0, DRIVING_TIME_LIMIT_MINUTES - cumulativeDriveTime);
-
-      if (wouldExceed && remainingBeforeLimit >= 0 && driveMinutes > remainingBeforeLimit) {
-        // Auto-break needed: calculate how much break time is still needed
-        const breakNeeded = Math.max(0, REQUIRED_BREAK_MINUTES - accumulatedBreakTime);
-        const driveBeforeBreak = remainingBeforeLimit;
-        const driveAfterBreak = driveMinutes - driveBeforeBreak;
-
-        if (breakNeeded > 0) {
-          autoBreaks[i] = {
-            driveBeforeBreak,
-            breakDuration: breakNeeded,
-            driveAfterBreak,
-          };
-
-          // Add driving time + break + remaining driving to timeline
-          currentDateTime = addMinutesToDateTime(currentDateTime, driveBeforeBreak);
-          currentDateTime = addMinutesToDateTime(currentDateTime, breakNeeded);
-          currentDateTime = addMinutesToDateTime(currentDateTime, driveAfterBreak);
-        } else {
-          // Break already fully accumulated from stops, just drive through
-          currentDateTime = addMinutesToDateTime(currentDateTime, driveMinutes);
-        }
-
-        // After auto-break, cumulative resets
-        cumulativeDriveTime = driveAfterBreak;
-        accumulatedBreakTime = 0;
-        stop.break_needed_before = false;
-        stop.cumulative_drive_time = cumulativeDriveTime;
-      } else {
-        // Normal: no auto-break needed
-        cumulativeDriveTime += driveMinutes;
+      if (!segmentRegulated) {
+        // Transporter / Auto: time still passes, but driving doesn't count toward
+        // the 4.5h limit and no auto-break is inserted. Cumulation carries over
+        // unchanged so a later LKW segment in the same tour resumes correctly.
+        currentDateTime = addMinutesToDateTime(currentDateTime, driveMinutes);
         stop.break_needed_before = cumulativeDriveTime >= DRIVING_TIME_LIMIT_MINUTES;
         stop.cumulative_drive_time = cumulativeDriveTime;
+      } else {
+        // Check if driving break is needed DURING this segment
+        const wouldExceed = cumulativeDriveTime + driveMinutes > DRIVING_TIME_LIMIT_MINUTES;
+        const remainingBeforeLimit = Math.max(0, DRIVING_TIME_LIMIT_MINUTES - cumulativeDriveTime);
 
-        currentDateTime = addMinutesToDateTime(currentDateTime, driveMinutes);
+        if (wouldExceed && remainingBeforeLimit >= 0 && driveMinutes > remainingBeforeLimit) {
+          // Auto-break needed: calculate how much break time is still needed
+          const breakNeeded = Math.max(0, REQUIRED_BREAK_MINUTES - accumulatedBreakTime);
+          const driveBeforeBreak = remainingBeforeLimit;
+          const driveAfterBreak = driveMinutes - driveBeforeBreak;
+
+          if (breakNeeded > 0) {
+            autoBreaks[i] = {
+              driveBeforeBreak,
+              breakDuration: breakNeeded,
+              driveAfterBreak,
+            };
+
+            // Add driving time + break + remaining driving to timeline
+            currentDateTime = addMinutesToDateTime(currentDateTime, driveBeforeBreak);
+            currentDateTime = addMinutesToDateTime(currentDateTime, breakNeeded);
+            currentDateTime = addMinutesToDateTime(currentDateTime, driveAfterBreak);
+          } else {
+            // Break already fully accumulated from stops, just drive through
+            currentDateTime = addMinutesToDateTime(currentDateTime, driveMinutes);
+          }
+
+          // After auto-break, cumulative resets
+          cumulativeDriveTime = driveAfterBreak;
+          accumulatedBreakTime = 0;
+          stop.break_needed_before = false;
+          stop.cumulative_drive_time = cumulativeDriveTime;
+        } else {
+          // Normal: no auto-break needed
+          cumulativeDriveTime += driveMinutes;
+          stop.break_needed_before = cumulativeDriveTime >= DRIVING_TIME_LIMIT_MINUTES;
+          stop.cumulative_drive_time = cumulativeDriveTime;
+
+          currentDateTime = addMinutesToDateTime(currentDateTime, driveMinutes);
+        }
       }
 
       totalDriveTime += driveMinutes;
+      if (segmentRegulated) totalLkwDriveTime += driveMinutes;
       totalDistance += distanceKm;
       addDistanceToTruck(activeTruck, distanceKm);
     } else {
@@ -161,6 +188,7 @@ export function calculateTourSchedule(
       stop.distance_from_prev = 0;
       stop.cumulative_drive_time = cumulativeDriveTime;
       stop.break_needed_before = cumulativeDriveTime >= DRIVING_TIME_LIMIT_MINUTES;
+      stop.route_polyline = null;
     }
 
     stop.arrival_eta = currentDateTime;
@@ -177,6 +205,12 @@ export function calculateTourSchedule(
     const standingTime = stop.loading_time + stop.wait_time;
     currentDateTime = addMinutesToDateTime(currentDateTime, standingTime);
     stop.departure_eta = currentDateTime;
+
+    // Apply truck change AFTER this stop's segment is processed.
+    // From this stop onwards (next segment), the new truck is used.
+    if (stop.truck_id && input.truckMap?.[stop.truck_id]) {
+      activeTruck = input.truckMap[stop.truck_id] ?? null;
+    }
 
     updatedStops.push(stop);
   }
@@ -251,6 +285,7 @@ export function calculateTourSchedule(
     totalDuration,
     totalDistance: finalDistance,
     totalDriveTime,
+    totalLkwDriveTime,
     costs,
     autoBreaks,
   };

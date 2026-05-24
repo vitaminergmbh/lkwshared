@@ -22,7 +22,7 @@ export async function getTourStopById(id: string): Promise<TourStop | null> {
 }
 
 export async function addTourStop(
-  data: Omit<TourStop, 'id' | 'arrival_eta' | 'departure_eta' | 'drive_time_from_prev' | 'distance_from_prev' | 'cumulative_drive_time' | 'time_window_ok' | 'break_needed_before'>
+  data: Omit<TourStop, 'id' | 'arrival_eta' | 'departure_eta' | 'drive_time_from_prev' | 'distance_from_prev' | 'cumulative_drive_time' | 'time_window_ok' | 'break_needed_before' | 'actual_arrival_eta' | 'actual_departure_eta' | 'delay_minutes' | 'live_status' | 'route_polyline' | 'projected_arrival_eta'>
 ): Promise<TourStop> {
   const { data: created, error } = await getSupabase()
     .from('tour_stops')
@@ -97,6 +97,7 @@ export async function updateTourStopsBatch(
         cumulative_drive_time: stop.cumulative_drive_time,
         time_window_ok: stop.time_window_ok,
         break_needed_before: stop.break_needed_before,
+        route_polyline: stop.route_polyline,
       })
       .eq('id', stop.id);
     if (error) throw new Error(error.message);

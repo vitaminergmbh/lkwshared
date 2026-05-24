@@ -33,7 +33,7 @@ export async function getToursByStatus(status: TourStatus): Promise<Tour[]> {
 }
 
 export async function createTour(
-  data: Omit<Tour, 'id' | 'created_at' | 'updated_at' | 'total_duration' | 'total_distance' | 'total_drive_time' | 'total_fuel_cost' | 'total_toll_cost' | 'total_driver_cost' | 'total_rental_cost' | 'total_cost'>
+  data: Omit<Tour, 'id' | 'created_at' | 'updated_at' | 'total_duration' | 'total_distance' | 'total_drive_time' | 'total_fuel_cost' | 'total_toll_cost' | 'total_driver_cost' | 'total_rental_cost' | 'total_cost' | 'tracking_enabled' | 'tracking_started_at' | 'completed_at'>
 ): Promise<Tour> {
   const { data: created, error } = await getSupabase()
     .from('tours')

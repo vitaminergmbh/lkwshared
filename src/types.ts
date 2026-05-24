@@ -23,9 +23,20 @@ export interface Location {
   notes: string | null;
   is_depot: boolean;
   tags: string[];
+  geofence_radius_m: number; // 50-5000m, default 500
+  /**
+   * Optional polygon geofence (array of {latitude, longitude} vertices, min 3 points).
+   * When set, this overrides the circle radius for geofence detection.
+   * Useful for sites near highways or with irregular shapes to avoid false positives.
+   */
+  geofence_polygon: Coordinates[] | null;
+  /** Soft-delete flag — archived locations are hidden from lists but preserved for historic tour references */
+  archived: boolean;
   created_at: string;
   updated_at: string;
 }
+
+export type LiveStopStatus = 'pending' | 'driving' | 'arrived' | 'loading' | 'departed';
 
 export interface LocationHours {
   id: string;
@@ -111,12 +122,17 @@ export interface Tour {
   driver_initial_drive_time: number; // Minutes already driven
   total_duration: number | null;     // Calculated total duration (min)
   total_distance: number | null;     // Calculated total distance (km)
-  total_drive_time: number | null;   // Calculated pure driving time (min)
+  total_drive_time: number | null;   // Calculated pure driving time (min) — all vehicle categories
+  total_lkw_drive_time?: number | null; // Subset of total_drive_time: only segments driven by LKW/Sonstige
   total_fuel_cost: number | null;    // Calculated fuel cost (EUR)
   total_toll_cost: number | null;    // Calculated toll cost (EUR)
   total_driver_cost: number | null;  // Calculated driver cost (EUR)
   total_rental_cost: number | null;  // Calculated rental cost (EUR)
   total_cost: number | null;         // Calculated total cost (EUR)
+  // Live tracking fields
+  tracking_enabled: boolean;          // Auto-tracking active when true
+  tracking_started_at: string | null; // When live tracking actually started
+  completed_at: string | null;        // When all stops were finished
   created_at: string;
   updated_at: string;
 }
@@ -143,6 +159,17 @@ export interface TourStop {
   break_needed_before: boolean;
   truck_id: string | null;                // LKW-Wechsel ab diesem Stop
   checked: boolean;                       // Stop wurde abgehakt (live tracking)
+  notes?: string | null;                  // Lade-/Entladeanweisungen für Fahrer
+  // Live tracking fields
+  actual_arrival_eta: string | null;      // First time the geofence was entered
+  actual_departure_eta: string | null;    // Time the geofence was left
+  delay_minutes: number | null;           // actual − planned, in minutes (positive = late)
+  live_status: LiveStopStatus;            // pending | driving | arrived | loading | departed
+  /** HERE Flexible Polyline of the route segment from previous stop TO this stop */
+  route_polyline: string | null;
+  /** ETA recalculated by the live-tracker via HERE after each departure event.
+   * Used in the UI in place of arrival_eta until actual_arrival_eta lands. */
+  projected_arrival_eta: string | null;
 }
 
 // === Live Tour Tracking ===
