@@ -44,3 +44,26 @@ export const EMISSION_CLASSES = [
 ] as const;
 
 export const CO2_CLASSES = [1, 2, 3, 4, 5] as const;
+
+// === Laderaum / Paletten ===
+
+export interface PalletTypeDef {
+  key: string;
+  label: string;
+  abbr: string;      // Kurzkürzel für die Anzeige in den Paletten-Kästchen
+  length_cm: number; // entlang der Laderaumlänge (ungedreht)
+  width_cm: number;
+  color: string;
+}
+
+export const PALLET_TYPES: PalletTypeDef[] = [
+  { key: 'euro',      label: 'Europalette',      abbr: 'EPAL', length_cm: 120, width_cm: 80,  color: '#3B82F6' },
+  { key: 'industrie', label: 'Industriepalette', abbr: 'INDU', length_cm: 120, width_cm: 100, color: '#22C55E' },
+  { key: 'halb',      label: 'Halbpalette',      abbr: 'HALB', length_cm: 80,  width_cm: 60,  color: '#F59E0B' },
+  { key: 'viertel',   label: 'Viertelpalette',   abbr: 'VIER', length_cm: 60,  width_cm: 40,  color: '#EC4899' },
+  { key: 'gitterbox', label: 'Gitterbox',        abbr: 'GIBO', length_cm: 120, width_cm: 80,  color: '#8B5CF6' },
+];
+
+// Standard-Sattelauflieger als Default-Laderaum
+export const DEFAULT_CARGO_LENGTH_CM = 1360;
+export const DEFAULT_CARGO_WIDTH_CM = 245;

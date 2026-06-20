@@ -106,6 +106,24 @@ export interface Driver {
   created_at: string;
 }
 
+// === Cargo / Laderaum ===
+
+export interface CargoPallet {
+  id: string;
+  type: string;       // Schlüssel aus PALLET_TYPES ('euro' | 'industrie' | ...)
+  x: number;          // Position in cm vom linken Rand (entlang der Länge)
+  y: number;          // Position in cm vom oberen Rand (über die Breite)
+  rotated: boolean;   // 90°-Drehung (Länge/Breite getauscht)
+  label: string;      // Ware, z.B. "Tomaten"
+  color: string;      // Hex-Farbe
+}
+
+export interface CargoLayout {
+  area_length_cm: number;   // Laderaumlänge (Fahrtrichtung)
+  area_width_cm: number;    // Laderaumbreite
+  pallets: CargoPallet[];
+}
+
 // === Tour ===
 
 export interface Tour {
@@ -129,6 +147,10 @@ export interface Tour {
   total_driver_cost: number | null;  // Calculated driver cost (EUR)
   total_rental_cost: number | null;  // Calculated rental cost (EUR)
   total_cost: number | null;         // Calculated total cost (EUR)
+  /** Optionaler Link, unter dem der Fahrer das Ladungs-Design sieht (Foto/PDF/URL) */
+  cargo_link?: string | null;
+  /** Im-App-Laderaum-Layout (Palettenanordnung) */
+  cargo_layout?: CargoLayout | null;
   // Live tracking fields
   tracking_enabled: boolean;          // Auto-tracking active when true
   tracking_started_at: string | null; // When live tracking actually started
@@ -160,6 +182,8 @@ export interface TourStop {
   truck_id: string | null;                // LKW-Wechsel ab diesem Stop
   checked: boolean;                       // Stop wurde abgehakt (live tracking)
   notes?: string | null;                  // Lade-/Entladeanweisungen für Fahrer
+  load_note?: string | null;              // Beladungs-Info für Fahrer (Emoji + Freitext)
+  unload_note?: string | null;            // Entladungs-Info für Fahrer (Emoji + Freitext)
   // Live tracking fields
   actual_arrival_eta: string | null;      // First time the geofence was entered
   actual_departure_eta: string | null;    // Time the geofence was left

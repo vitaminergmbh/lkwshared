@@ -17,6 +17,8 @@ export type {
   TourStop,
   LiveTourStatus,
   LiveStopStatus,
+  CargoPallet,
+  CargoLayout,
   HereRouteSegment,
   HereGeocodingResult,
   HereAutosuggestResult,
@@ -81,7 +83,11 @@ export {
   TRUCK_CATEGORIES,
   EMISSION_CLASSES,
   CO2_CLASSES,
+  PALLET_TYPES,
+  DEFAULT_CARGO_LENGTH_CM,
+  DEFAULT_CARGO_WIDTH_CM,
 } from './utils/constants';
+export type { PalletTypeDef } from './utils/constants';
 
 // === Cost Calculation ===
 export { getTollRatePerKm } from './utils/tollRates';

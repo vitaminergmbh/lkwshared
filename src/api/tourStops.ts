@@ -81,6 +81,24 @@ export async function reorderTourStops(
   }
 }
 
+/**
+ * Updates the coordinates of every tour_stop that references a given location.
+ * Called when a location is moved so existing tours don't keep stale coordinates.
+ * Note: this touches ALL stops with this location_id (including past tours);
+ * affected open tours pick up correct routing/ETAs on their next recalc.
+ */
+export async function updateStopCoordinatesForLocation(
+  locationId: string,
+  latitude: number,
+  longitude: number
+): Promise<void> {
+  const { error } = await getSupabase()
+    .from('tour_stops')
+    .update({ latitude, longitude })
+    .eq('location_id', locationId);
+  if (error) throw new Error(error.message);
+}
+
 export async function updateTourStopsBatch(
   stops: TourStop[]
 ): Promise<void> {

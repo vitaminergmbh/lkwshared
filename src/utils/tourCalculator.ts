@@ -221,33 +221,46 @@ export function calculateTourSchedule(
     if (returnSegment) {
       const returnDriveMinutes = Math.ceil(returnSegment.duration / 60);
       const returnDistanceKm = returnSegment.length / 1000;
+      const returnRegulated = isDrivingTimeRegulated(activeTruck);
 
-      // Check last stop for break credit
-      if (updatedStops.length > 0) {
-        const lastStop = updatedStops[updatedStops.length - 1]!;
-        if (lastStop.counts_as_break) {
-          accumulatedBreakTime += lastStop.loading_time + lastStop.wait_time;
-          if (accumulatedBreakTime >= REQUIRED_BREAK_MINUTES) {
-            cumulativeDriveTime = 0;
-            accumulatedBreakTime = 0;
+      if (!returnRegulated) {
+        // Transporter / Auto: Zeit vergeht, aber keine Lenkzeit-/Pausenlogik und
+        // kein Beitrag zur LKW-Lenkzeit-Summe.
+        currentDateTime = addMinutesToDateTime(currentDateTime, returnDriveMinutes);
+      } else {
+        // Letzten Stop auf Pausen-Gutschrift prüfen (Split-Pause)
+        if (updatedStops.length > 0) {
+          const lastStop = updatedStops[updatedStops.length - 1]!;
+          if (lastStop.counts_as_break) {
+            accumulatedBreakTime += lastStop.loading_time + lastStop.wait_time;
+            if (accumulatedBreakTime >= REQUIRED_BREAK_MINUTES) {
+              cumulativeDriveTime = 0;
+              accumulatedBreakTime = 0;
+            }
           }
         }
-      }
 
-      const wouldExceed = cumulativeDriveTime + returnDriveMinutes > DRIVING_TIME_LIMIT_MINUTES;
-      const remaining = Math.max(0, DRIVING_TIME_LIMIT_MINUTES - cumulativeDriveTime);
+        const wouldExceed = cumulativeDriveTime + returnDriveMinutes > DRIVING_TIME_LIMIT_MINUTES;
+        const remaining = Math.max(0, DRIVING_TIME_LIMIT_MINUTES - cumulativeDriveTime);
 
-      if (wouldExceed && remaining >= 0 && returnDriveMinutes > remaining) {
-        const breakNeeded = Math.max(0, REQUIRED_BREAK_MINUTES - accumulatedBreakTime);
-        if (breakNeeded > 0) {
-          currentDateTime = addMinutesToDateTime(currentDateTime, remaining);
-          currentDateTime = addMinutesToDateTime(currentDateTime, breakNeeded);
-          currentDateTime = addMinutesToDateTime(currentDateTime, returnDriveMinutes - remaining);
+        if (wouldExceed && returnDriveMinutes > remaining) {
+          const breakNeeded = Math.max(0, REQUIRED_BREAK_MINUTES - accumulatedBreakTime);
+          if (breakNeeded > 0) {
+            currentDateTime = addMinutesToDateTime(currentDateTime, remaining);
+            currentDateTime = addMinutesToDateTime(currentDateTime, breakNeeded);
+            currentDateTime = addMinutesToDateTime(currentDateTime, returnDriveMinutes - remaining);
+          } else {
+            currentDateTime = addMinutesToDateTime(currentDateTime, returnDriveMinutes);
+          }
+          cumulativeDriveTime = returnDriveMinutes - remaining;
+          accumulatedBreakTime = 0;
         } else {
+          cumulativeDriveTime += returnDriveMinutes;
           currentDateTime = addMinutesToDateTime(currentDateTime, returnDriveMinutes);
         }
-      } else {
-        currentDateTime = addMinutesToDateTime(currentDateTime, returnDriveMinutes);
+
+        // Rückfahrt zählt zur LKW-Lenkzeit (Bug-Fix: wurde zuvor ausgelassen)
+        totalLkwDriveTime += returnDriveMinutes;
       }
 
       totalDriveTime += returnDriveMinutes;

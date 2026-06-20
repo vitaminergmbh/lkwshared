@@ -5,6 +5,9 @@
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "scripts": {
+    "test": "node --import ./test-setup.mjs --test \"src/**/*.test.ts\""
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4"
   },
