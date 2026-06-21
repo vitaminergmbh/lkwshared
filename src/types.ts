@@ -23,6 +23,8 @@ export interface Location {
   notes: string | null;
   is_depot: boolean;
   tags: string[];
+  /** Standort benötigt eine Hebebühne zum Be-/Entladen. */
+  needs_liftgate?: boolean;
   geofence_radius_m: number; // 50-5000m, default 500
   /**
    * Optional polygon geofence (array of {latitude, longitude} vertices, min 3 points).
@@ -61,6 +63,8 @@ export interface Truck {
   length_cm: number | null;
   gross_weight_kg: number | null;
   axle_count: number;
+  /** Fahrzeug hat eine Hebebühne (Ladebordwand). */
+  has_liftgate?: boolean;
   fuel_consumption_per_100km: number | null;
   emission_class: string | null;
   co2_class: number | null;
