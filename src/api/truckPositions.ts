@@ -10,6 +10,8 @@ interface TruckPositionRow {
   battery: number | null;
   recorded_at: string;
   fetched_at: string;
+  geofence_name?: string | null;
+  geofence_since?: string | null;
 }
 
 function rowToPosition(row: TruckPositionRow): TruckPosition {
@@ -20,6 +22,8 @@ function rowToPosition(row: TruckPositionRow): TruckPosition {
     speed: row.speed,
     battery: row.battery,
     timestamp: row.recorded_at,
+    geofence_name: row.geofence_name ?? null,
+    geofence_since: row.geofence_since ?? null,
   };
 }
 

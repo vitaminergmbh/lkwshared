@@ -80,6 +80,10 @@ export interface TruckPosition {
   battery: number | null;
   timestamp: string;
   address?: string;
+  /** Name des Standort-Geofence, in dem das Fahrzeug aktuell steht (oder null). */
+  geofence_name?: string | null;
+  /** Zeitpunkt, seit dem das Fahrzeug ununterbrochen in diesem Geofence steht. */
+  geofence_since?: string | null;
 }
 
 export interface PajDevice {
