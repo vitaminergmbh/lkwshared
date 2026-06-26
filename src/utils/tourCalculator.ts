@@ -160,10 +160,12 @@ export function calculateTourSchedule(
         const restWithin = dailyDriveTime + driveMinutes > maxDailyDrive && driveMinutes > tillRest;
         const breakWithin = cumulativeDriveTime + driveMinutes > DRIVING_TIME_LIMIT_MINUTES && driveMinutes > tillBreak;
 
-        if (restWithin && tillRest <= tillBreak) {
-          // Tagesruhezeit erreicht (deckt zugleich die fällige 45-Min-Pause):
-          // bis zur Grenze fahren, 9-h-Ruhe, dann Rest des Segments.
-          const driveBefore = tillRest;
+        if (restWithin && tillRest <= tillBreak + REQUIRED_BREAK_MINUTES) {
+          // Tagesruhe einlegen, wenn die Tageslenkzeit-Grenze in diesem Segment erreicht
+          // wird UND spätestens kurz (≤ Pausendauer) nach der 4,5-h-Pause liegt — eine
+          // 45-Min-Pause unmittelbar davor wäre sinnlos, die 9-h-Ruhe deckt sie ab.
+          // Ruhe am früheren der beiden Punkte (4,5-h-Regel bleibt gewahrt, ggf. etwas früher).
+          const driveBefore = Math.min(tillRest, tillBreak);
           const driveAfter = driveMinutes - driveBefore;
           autoBreaks[i] = { driveBeforeBreak: driveBefore, breakDuration: DAILY_REST_MINUTES, driveAfterBreak: driveAfter };
           dailyRests[i] = DAILY_REST_MINUTES;
