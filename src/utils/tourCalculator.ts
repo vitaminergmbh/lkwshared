@@ -150,49 +150,60 @@ export function calculateTourSchedule(
         stop.break_needed_before = cumulativeDriveTime >= DRIVING_TIME_LIMIT_MINUTES;
         stop.cumulative_drive_time = cumulativeDriveTime;
       } else {
-        // Check if driving break is needed DURING this segment
-        const wouldExceed = cumulativeDriveTime + driveMinutes > DRIVING_TIME_LIMIT_MINUTES;
-        const remainingBeforeLimit = Math.max(0, DRIVING_TIME_LIMIT_MINUTES - cumulativeDriveTime);
+        // Grenzen innerhalb dieses Segments:
+        // - 45-Min-Pause bei 4,5 h Lenkzeit (cumulativeDriveTime)
+        // - 9-h-Tagesruhe bei 9 h Tageslenkzeit (dailyDriveTime)
+        const tillBreak = Math.max(0, DRIVING_TIME_LIMIT_MINUTES - cumulativeDriveTime);
+        const tillRest = Math.max(0, MAX_DAILY_DRIVE_MINUTES - dailyDriveTime);
+        const restWithin = dailyDriveTime + driveMinutes > MAX_DAILY_DRIVE_MINUTES && driveMinutes > tillRest;
+        const breakWithin = cumulativeDriveTime + driveMinutes > DRIVING_TIME_LIMIT_MINUTES && driveMinutes > tillBreak;
 
-        if (wouldExceed && remainingBeforeLimit >= 0 && driveMinutes > remainingBeforeLimit) {
-          // Auto-break needed: calculate how much break time is still needed
+        if (restWithin && tillRest <= tillBreak) {
+          // Tagesruhezeit erreicht (deckt zugleich die fällige 45-Min-Pause):
+          // bis zur Grenze fahren, 9-h-Ruhe, dann Rest des Segments.
+          const driveBefore = tillRest;
+          const driveAfter = driveMinutes - driveBefore;
+          autoBreaks[i] = { driveBeforeBreak: driveBefore, breakDuration: DAILY_REST_MINUTES, driveAfterBreak: driveAfter };
+          dailyRests[i] = DAILY_REST_MINUTES;
+          currentDateTime = addMinutesToDateTime(currentDateTime, driveBefore);
+          currentDateTime = addMinutesToDateTime(currentDateTime, DAILY_REST_MINUTES);
+          currentDateTime = addMinutesToDateTime(currentDateTime, driveAfter);
+          cumulativeDriveTime = driveAfter;
+          dailyDriveTime = driveAfter; // nach der Ruhe beginnt der neue Tag
+          accumulatedBreakTime = 0;
+          stop.break_needed_before = false;
+          stop.cumulative_drive_time = cumulativeDriveTime;
+        } else if (breakWithin) {
+          // 45-Min-Lenkzeitunterbrechung mitten im Segment
           const breakNeeded = Math.max(0, REQUIRED_BREAK_MINUTES - accumulatedBreakTime);
-          const driveBeforeBreak = remainingBeforeLimit;
+          const driveBeforeBreak = tillBreak;
           const driveAfterBreak = driveMinutes - driveBeforeBreak;
 
           if (breakNeeded > 0) {
-            autoBreaks[i] = {
-              driveBeforeBreak,
-              breakDuration: breakNeeded,
-              driveAfterBreak,
-            };
-
-            // Add driving time + break + remaining driving to timeline
+            autoBreaks[i] = { driveBeforeBreak, breakDuration: breakNeeded, driveAfterBreak };
             currentDateTime = addMinutesToDateTime(currentDateTime, driveBeforeBreak);
             currentDateTime = addMinutesToDateTime(currentDateTime, breakNeeded);
             currentDateTime = addMinutesToDateTime(currentDateTime, driveAfterBreak);
           } else {
-            // Break already fully accumulated from stops, just drive through
             currentDateTime = addMinutesToDateTime(currentDateTime, driveMinutes);
           }
-
-          // After auto-break, cumulative resets
           cumulativeDriveTime = driveAfterBreak;
           accumulatedBreakTime = 0;
+          dailyDriveTime += driveMinutes; // gesamte Segment-Lenkzeit zählt zum Tag
           stop.break_needed_before = false;
           stop.cumulative_drive_time = cumulativeDriveTime;
         } else {
-          // Normal: no auto-break needed
+          // Normal: keine Unterbrechung nötig
           cumulativeDriveTime += driveMinutes;
+          dailyDriveTime += driveMinutes;
           stop.break_needed_before = cumulativeDriveTime >= DRIVING_TIME_LIMIT_MINUTES;
           stop.cumulative_drive_time = cumulativeDriveTime;
-
           currentDateTime = addMinutesToDateTime(currentDateTime, driveMinutes);
         }
       }
 
       totalDriveTime += driveMinutes;
-      if (segmentRegulated) { totalLkwDriveTime += driveMinutes; dailyDriveTime += driveMinutes; }
+      if (segmentRegulated) totalLkwDriveTime += driveMinutes;
       totalDistance += distanceKm;
       addDistanceToTruck(activeTruck, distanceKm);
     } else {
@@ -217,18 +228,6 @@ export function calculateTourSchedule(
     const standingTime = stop.loading_time + stop.wait_time;
     currentDateTime = addMinutesToDateTime(currentDateTime, standingTime);
     stop.departure_eta = currentDateTime;
-
-    // Tagesruhezeit: ist die maximale Tageslenkzeit (9 h) erreicht und es geht noch
-    // weiter, eine 9-h-Ruhe einlegen, bevor weitergefahren wird. Setzt Tages- und
-    // 4,5-h-Lenkzeit zurück. Die Ruhe gehört zum Fahrt-Segment NACH diesem Stop.
-    const moreDrivingAhead = i < stops.length - 1 || (hasReturnToDepot && hasDepot);
-    if (dailyDriveTime >= MAX_DAILY_DRIVE_MINUTES && moreDrivingAhead) {
-      currentDateTime = addMinutesToDateTime(currentDateTime, DAILY_REST_MINUTES);
-      dailyRests[i + 1] = DAILY_REST_MINUTES;
-      dailyDriveTime = 0;
-      cumulativeDriveTime = 0;
-      accumulatedBreakTime = 0;
-    }
 
     // Apply truck change AFTER this stop's segment is processed.
     // From this stop onwards (next segment), the new truck is used.

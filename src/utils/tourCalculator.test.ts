@@ -75,3 +75,37 @@ test('Rückfahrt per Transporter zählt NICHT zur LKW-Lenkzeit', () => {
   assert.equal(r.totalDriveTime, 150, 'Gesamtfahrzeit unverändert');
   assert.equal(r.totalLkwDriveTime, 100, 'nur die ersten beiden LKW-Segmente (60+40)');
 });
+
+test('Tagesruhezeit (9h) nach maximaler Tageslenkzeit (9h) eingeplant', () => {
+  // s1 -> s2 (5h18) -> s3 (5h27) = 10h45 LKW-Lenkzeit, kein Depot.
+  const input: TourCalculationInput = {
+    tour: baseTour,
+    stops: [stop('s1'), stop('s2'), stop('s3')],
+    segments: [seg(318, 400), seg(327, 400)],
+    locationHoursMap: {},
+    hasDepot: false,
+    hasReturnToDepot: false,
+    truck: lkw,
+  };
+  const r = calculateTourSchedule(input);
+  assert.equal(r.dailyRests[1], undefined, 's1->s2 ist nur 45-Min-Pause');
+  assert.equal(r.dailyRests[2], 540, 's2->s3 löst die 9h-Tagesruhe aus');
+  assert.equal(r.autoBreaks[2]?.breakDuration, 540, 'die Unterbrechung ist die 9h-Ruhe');
+  // s2->s3: 222 Min fahren, 540 Ruhe, 105 Min fahren
+  assert.equal(r.autoBreaks[2]?.driveBeforeBreak, 222);
+  assert.equal(r.autoBreaks[2]?.driveAfterBreak, 105);
+});
+
+test('Transporter löst keine Tagesruhe aus', () => {
+  const input: TourCalculationInput = {
+    tour: baseTour,
+    stops: [stop('s1'), stop('s2'), stop('s3')],
+    segments: [seg(318, 400), seg(327, 400)],
+    locationHoursMap: {},
+    hasDepot: false,
+    hasReturnToDepot: false,
+    truck: transporter,
+  };
+  const r = calculateTourSchedule(input);
+  assert.deepEqual(r.dailyRests, {}, 'Transporter: keine Tagesruhe');
+});
