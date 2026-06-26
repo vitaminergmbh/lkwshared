@@ -2,7 +2,10 @@ import type { Tour, TourStop, Truck, LocationHours } from '../types';
 import type { HereRouteSegment } from '../types';
 import { createDateTime, addMinutesToDateTime } from './formatters';
 import { isWithinOpeningHours } from './timeWindows';
-import { DRIVING_TIME_LIMIT_MINUTES, REQUIRED_BREAK_MINUTES } from './constants';
+import {
+  DRIVING_TIME_LIMIT_MINUTES, REQUIRED_BREAK_MINUTES,
+  MAX_DAILY_DRIVE_MINUTES, DAILY_REST_MINUTES,
+} from './constants';
 import { calculateTourCosts, type CostSettings, type CostBreakdown, type TruckSegment } from './costCalculator';
 
 /**
@@ -50,6 +53,9 @@ export interface TourCalculationResult {
   costs: CostBreakdown | null;
   /** Auto-break info per stop index (only for stops where break happens during transit) */
   autoBreaks: Record<number, AutoBreakInfo>;
+  /** Tagesruhezeit (Minuten) je Stop-Index: die Ruhe wird VOR dem Fahrt-Segment zu
+   *  diesem Stop eingelegt (also nach dem vorherigen Stop). */
+  dailyRests: Record<number, number>;
 }
 
 export function calculateTourSchedule(
@@ -66,6 +72,7 @@ export function calculateTourSchedule(
       totalLkwDriveTime: 0,
       costs: null,
       autoBreaks: {},
+      dailyRests: {},
     };
   }
 
@@ -76,11 +83,16 @@ export function calculateTourSchedule(
   let totalLkwDriveTime = 0;
   let totalDistance = 0;
   const autoBreaks: Record<number, AutoBreakInfo> = {};
+  const dailyRests: Record<number, number> = {};
 
   // Split-break tracking: accumulated break time since last full reset
   // A full reset happens when accumulated break >= 45 min
   // Partial breaks (e.g. 30 min) are tracked and the remaining (e.g. 15 min) is used for auto-breaks
   let accumulatedBreakTime = 0;
+
+  // Tageslenkzeit (geregelte Minuten seit der letzten Tagesruhe) — startet mit der
+  // bereits gefahrenen Lenkzeit des Fahrers.
+  let dailyDriveTime = tour.driver_initial_drive_time;
 
   // Track active truck and per-truck distance for cost calculation
   let activeTruck = input.truck ?? null;
@@ -180,7 +192,7 @@ export function calculateTourSchedule(
       }
 
       totalDriveTime += driveMinutes;
-      if (segmentRegulated) totalLkwDriveTime += driveMinutes;
+      if (segmentRegulated) { totalLkwDriveTime += driveMinutes; dailyDriveTime += driveMinutes; }
       totalDistance += distanceKm;
       addDistanceToTruck(activeTruck, distanceKm);
     } else {
@@ -205,6 +217,18 @@ export function calculateTourSchedule(
     const standingTime = stop.loading_time + stop.wait_time;
     currentDateTime = addMinutesToDateTime(currentDateTime, standingTime);
     stop.departure_eta = currentDateTime;
+
+    // Tagesruhezeit: ist die maximale Tageslenkzeit (9 h) erreicht und es geht noch
+    // weiter, eine 9-h-Ruhe einlegen, bevor weitergefahren wird. Setzt Tages- und
+    // 4,5-h-Lenkzeit zurück. Die Ruhe gehört zum Fahrt-Segment NACH diesem Stop.
+    const moreDrivingAhead = i < stops.length - 1 || (hasReturnToDepot && hasDepot);
+    if (dailyDriveTime >= MAX_DAILY_DRIVE_MINUTES && moreDrivingAhead) {
+      currentDateTime = addMinutesToDateTime(currentDateTime, DAILY_REST_MINUTES);
+      dailyRests[i + 1] = DAILY_REST_MINUTES;
+      dailyDriveTime = 0;
+      cumulativeDriveTime = 0;
+      accumulatedBreakTime = 0;
+    }
 
     // Apply truck change AFTER this stop's segment is processed.
     // From this stop onwards (next segment), the new truck is used.
@@ -301,5 +325,6 @@ export function calculateTourSchedule(
     totalLkwDriveTime,
     costs,
     autoBreaks,
+    dailyRests,
   };
 }
