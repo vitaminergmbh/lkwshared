@@ -146,6 +146,8 @@ export interface Tour {
   depot_id: string | null;
   driver_id: string | null;
   driver_initial_drive_time: number; // Minutes already driven
+  /** Verlängerte Tageslenkzeit auf 10 h zulassen (statt regulär 9 h). */
+  extended_drive_time?: boolean;
   total_duration: number | null;     // Calculated total duration (min)
   total_distance: number | null;     // Calculated total distance (km)
   total_drive_time: number | null;   // Calculated pure driving time (min) — all vehicle categories

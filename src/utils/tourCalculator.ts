@@ -4,7 +4,7 @@ import { createDateTime, addMinutesToDateTime } from './formatters';
 import { isWithinOpeningHours } from './timeWindows';
 import {
   DRIVING_TIME_LIMIT_MINUTES, REQUIRED_BREAK_MINUTES,
-  MAX_DAILY_DRIVE_MINUTES, DAILY_REST_MINUTES,
+  MAX_DAILY_DRIVE_MINUTES, MAX_DAILY_DRIVE_EXTENDED_MINUTES, DAILY_REST_MINUTES,
 } from './constants';
 import { calculateTourCosts, type CostSettings, type CostBreakdown, type TruckSegment } from './costCalculator';
 
@@ -93,6 +93,8 @@ export function calculateTourSchedule(
   // Tageslenkzeit (geregelte Minuten seit der letzten Tagesruhe) — startet mit der
   // bereits gefahrenen Lenkzeit des Fahrers.
   let dailyDriveTime = tour.driver_initial_drive_time;
+  // Max. Tageslenkzeit: regulär 9 h, optional verlängert auf 10 h.
+  const maxDailyDrive = tour.extended_drive_time ? MAX_DAILY_DRIVE_EXTENDED_MINUTES : MAX_DAILY_DRIVE_MINUTES;
 
   // Track active truck and per-truck distance for cost calculation
   let activeTruck = input.truck ?? null;
@@ -154,8 +156,8 @@ export function calculateTourSchedule(
         // - 45-Min-Pause bei 4,5 h Lenkzeit (cumulativeDriveTime)
         // - 9-h-Tagesruhe bei 9 h Tageslenkzeit (dailyDriveTime)
         const tillBreak = Math.max(0, DRIVING_TIME_LIMIT_MINUTES - cumulativeDriveTime);
-        const tillRest = Math.max(0, MAX_DAILY_DRIVE_MINUTES - dailyDriveTime);
-        const restWithin = dailyDriveTime + driveMinutes > MAX_DAILY_DRIVE_MINUTES && driveMinutes > tillRest;
+        const tillRest = Math.max(0, maxDailyDrive - dailyDriveTime);
+        const restWithin = dailyDriveTime + driveMinutes > maxDailyDrive && driveMinutes > tillRest;
         const breakWithin = cumulativeDriveTime + driveMinutes > DRIVING_TIME_LIMIT_MINUTES && driveMinutes > tillBreak;
 
         if (restWithin && tillRest <= tillBreak) {

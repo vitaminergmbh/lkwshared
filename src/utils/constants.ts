@@ -3,10 +3,11 @@
 export const DRIVING_TIME_LIMIT_MINUTES = 270; // 4.5 hours
 export const REQUIRED_BREAK_MINUTES = 45;
 
-// Maximale Tageslenkzeit (regulär 9 h) und verkürzte Tagesruhezeit (9 h).
-// Nach Erreichen der Tageslenkzeit muss eine Tagesruhe eingelegt werden.
-export const MAX_DAILY_DRIVE_MINUTES = 540; // 9 hours
-export const DAILY_REST_MINUTES = 540;      // 9 hours (verkürzte Tagesruhezeit)
+// Maximale Tageslenkzeit (regulär 9 h, verlängert 10 h) und verkürzte
+// Tagesruhezeit (9 h). Nach Erreichen der Tageslenkzeit muss eine Tagesruhe rein.
+export const MAX_DAILY_DRIVE_MINUTES = 540;          // 9 hours (regulär)
+export const MAX_DAILY_DRIVE_EXTENDED_MINUTES = 600; // 10 hours (verlängert, 2×/Woche)
+export const DAILY_REST_MINUTES = 540;               // 9 hours (verkürzte Tagesruhezeit)
 
 // === Default Values ===
 
