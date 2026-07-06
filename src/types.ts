@@ -62,6 +62,8 @@ export interface VehicleDeadline {
   interval_months: number | null;
   /** Datum der letzten Durchführung (ISO YYYY-MM-DD). */
   last_done: string | null;
+  /** Standort/Werkstatt, wo es erledigt wurde (FK auf locations), oder null. */
+  location_id: string | null;
   note: string | null;
   updated_at: string;
 }

@@ -22,6 +22,7 @@ export interface DeadlinePatch {
   due_date?: string | null;
   interval_months?: number | null;
   last_done?: string | null;
+  location_id?: string | null;
   note?: string | null;
 }
 
