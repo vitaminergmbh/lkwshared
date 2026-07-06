@@ -19,6 +19,7 @@ export type {
   LiveStopStatus,
   CargoPallet,
   CargoLayout,
+  VehicleDeadline,
   HereRouteSegment,
   HereGeocodingResult,
   HereAutosuggestResult,
@@ -33,6 +34,7 @@ export * as TourStopAPI from './api/tourStops';
 export * as SettingsAPI from './api/settings';
 export * as DriverAPI from './api/drivers';
 export * as TruckPositionsAPI from './api/truckPositions';
+export * as VehicleDeadlineAPI from './api/vehicleDeadlines';
 
 // === Utils ===
 export {
@@ -102,3 +104,26 @@ export type { RealtimeHandlers, RealtimeEvent } from './realtime';
 
 // === GeoJSON Export ===
 export { buildLocationsGeoJson, buildLocationsGeoJsonString } from './utils/geojsonExport';
+
+// === Fahrzeug-Termine (Prüfungen/Wartung) ===
+export {
+  DEADLINE_KINDS,
+  DEADLINE_KIND_MAP,
+  DEADLINE_CATEGORY_LABELS,
+  DEADLINE_SOON_DAYS,
+  DEADLINE_URGENT_DAYS,
+  HEAVY_CATEGORIES,
+  isHeavyVehicle,
+  kindsForCategory,
+  daysUntil,
+  deadlineLevel,
+  deadlineSortKey,
+  addMonthsToDate,
+} from './utils/deadlines';
+export type {
+  DeadlineKind,
+  DeadlineCategory,
+  DeadlineAppliesTo,
+  DeadlineLevel,
+} from './utils/deadlines';
+export type { DeadlinePatch } from './api/vehicleDeadlines';

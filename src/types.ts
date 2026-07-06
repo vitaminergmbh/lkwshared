@@ -51,6 +51,21 @@ export interface LocationHours {
 
 // === Truck ===
 
+export interface VehicleDeadline {
+  id: string;
+  truck_id: string;
+  /** Schlüssel aus DEADLINE_KINDS (z.B. 'hu', 'sp', 'tacho', 'oil'). */
+  kind: string;
+  /** Nächste Fälligkeit als ISO-Datum (YYYY-MM-DD) oder null (nicht hinterlegt). */
+  due_date: string | null;
+  /** Optionales Intervall in Monaten für „erledigt → nächster Termin". */
+  interval_months: number | null;
+  /** Datum der letzten Durchführung (ISO YYYY-MM-DD). */
+  last_done: string | null;
+  note: string | null;
+  updated_at: string;
+}
+
 export interface Truck {
   id: string;
   name: string;
