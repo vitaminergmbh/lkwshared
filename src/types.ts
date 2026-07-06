@@ -68,6 +68,21 @@ export interface VehicleDeadline {
   updated_at: string;
 }
 
+export interface VehicleDocument {
+  id: string;
+  truck_id: string;
+  /** Bezeichnung, z.B. „Zulassungsbescheinigung Teil I", „Versicherung Haftpflicht", „Reifengröße". */
+  title: string;
+  /** Freitext-Wert, z.B. Nummer/Police/Maß. */
+  value: string | null;
+  note: string | null;
+  /** Storage-Pfad im Bucket 'vehicle-docs' (Scan/Foto), oder null. */
+  file_path: string | null;
+  file_name: string | null;
+  sort_order: number;
+  updated_at: string;
+}
+
 export interface Truck {
   id: string;
   name: string;

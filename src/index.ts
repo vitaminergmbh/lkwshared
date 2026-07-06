@@ -20,6 +20,7 @@ export type {
   CargoPallet,
   CargoLayout,
   VehicleDeadline,
+  VehicleDocument,
   HereRouteSegment,
   HereGeocodingResult,
   HereAutosuggestResult,
@@ -35,6 +36,7 @@ export * as SettingsAPI from './api/settings';
 export * as DriverAPI from './api/drivers';
 export * as TruckPositionsAPI from './api/truckPositions';
 export * as VehicleDeadlineAPI from './api/vehicleDeadlines';
+export * as VehicleDocumentAPI from './api/vehicleDocuments';
 
 // === Utils ===
 export {
@@ -127,3 +129,4 @@ export type {
   DeadlineLevel,
 } from './utils/deadlines';
 export type { DeadlinePatch } from './api/vehicleDeadlines';
+export type { DocumentPatch } from './api/vehicleDocuments';
