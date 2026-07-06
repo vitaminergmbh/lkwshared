@@ -108,8 +108,64 @@ export function deadlineSortKey(dueDate: string | null | undefined, today: Date 
 export function addMonthsToDate(isoDate: string, months: number): string {
   const d = new Date(`${isoDate}T00:00:00`);
   d.setMonth(d.getMonth() + months);
+  return toIsoDate(d);
+}
+
+function toIsoDate(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
+}
+
+const AVG_DAYS_PER_MONTH = 30.44;
+
+// === Kilometer-basierte Intervalle ===
+
+export interface OdometerPoint {
+  reading_date: string;
+  km: number;
+}
+
+/** Durchschnittliche Fahrleistung in km/Monat aus den Ablesungen (min. 2 nötig). */
+export function avgKmPerMonth(readings: OdometerPoint[]): number | null {
+  if (readings.length < 2) return null;
+  const sorted = [...readings].sort((a, b) => a.reading_date.localeCompare(b.reading_date));
+  const first = sorted[0]!;
+  const last = sorted[sorted.length - 1]!;
+  const days = (new Date(`${last.reading_date}T00:00:00Z`).getTime() - new Date(`${first.reading_date}T00:00:00Z`).getTime()) / 86_400_000;
+  const dkm = last.km - first.km;
+  const months = days / AVG_DAYS_PER_MONTH;
+  if (months <= 0 || dkm <= 0) return null;
+  return dkm / months;
+}
+
+/**
+ * Geschätztes Fälligkeitsdatum aufgrund der km-Leistung.
+ * Rückgabe: ISO-Datum, heutiges Datum (bereits km-überfällig) oder null (nicht berechenbar).
+ */
+export function projectKmDueDate(
+  lastDoneKm: number | null | undefined,
+  intervalKm: number | null | undefined,
+  currentKm: number | null | undefined,
+  kmPerMonth: number | null | undefined,
+  today: Date = new Date(),
+): string | null {
+  if (lastDoneKm == null || !intervalKm || currentKm == null) return null;
+  const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const remainingKm = lastDoneKm + intervalKm - currentKm;
+  if (remainingKm <= 0) return toIsoDate(base); // km-Grenze bereits erreicht → jetzt fällig
+  if (!kmPerMonth || kmPerMonth <= 0) return null; // ohne Fahrleistung nicht schätzbar
+  const days = (remainingKm / kmPerMonth) * AVG_DAYS_PER_MONTH;
+  base.setDate(base.getDate() + Math.round(days));
+  return toIsoDate(base);
+}
+
+/** Früheres der beiden Fälligkeitsdaten (Datum-Intervall vs. km-Schätzung). */
+export function effectiveDueDate(
+  dueDate: string | null | undefined,
+  kmDueDate: string | null | undefined,
+): string | null {
+  if (dueDate && kmDueDate) return dueDate <= kmDueDate ? dueDate : kmDueDate;
+  return dueDate ?? kmDueDate ?? null;
 }

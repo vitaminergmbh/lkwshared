@@ -22,6 +22,7 @@ export type {
   VehicleDeadline,
   VehicleDocument,
   VehicleServiceLog,
+  VehicleOdometer,
   HereRouteSegment,
   HereGeocodingResult,
   HereAutosuggestResult,
@@ -39,6 +40,7 @@ export * as TruckPositionsAPI from './api/truckPositions';
 export * as VehicleDeadlineAPI from './api/vehicleDeadlines';
 export * as VehicleDocumentAPI from './api/vehicleDocuments';
 export * as ServiceLogAPI from './api/serviceLog';
+export * as OdometerAPI from './api/odometer';
 
 // === Utils ===
 export {
@@ -120,6 +122,9 @@ export {
   isHeavyVehicle,
   kindsForCategory,
   kindsForTruck,
+  avgKmPerMonth,
+  projectKmDueDate,
+  effectiveDueDate,
   daysUntil,
   deadlineLevel,
   deadlineSortKey,
@@ -130,6 +135,7 @@ export type {
   DeadlineCategory,
   DeadlineAppliesTo,
   DeadlineLevel,
+  OdometerPoint,
 } from './utils/deadlines';
 export type { DeadlinePatch } from './api/vehicleDeadlines';
 export type { DocumentPatch } from './api/vehicleDocuments';

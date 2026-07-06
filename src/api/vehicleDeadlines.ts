@@ -21,6 +21,8 @@ export async function getDeadlinesForTruck(truckId: string): Promise<VehicleDead
 export interface DeadlinePatch {
   due_date?: string | null;
   interval_months?: number | null;
+  interval_km?: number | null;
+  last_done_km?: number | null;
   last_done?: string | null;
   location_id?: string | null;
   note?: string | null;

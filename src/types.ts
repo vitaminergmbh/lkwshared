@@ -60,6 +60,10 @@ export interface VehicleDeadline {
   due_date: string | null;
   /** Optionales Intervall in Monaten für „erledigt → nächster Termin". */
   interval_months: number | null;
+  /** Optionales km-Intervall (z.B. Ölwechsel alle 40.000 km). */
+  interval_km: number | null;
+  /** km-Stand bei der letzten Durchführung. */
+  last_done_km: number | null;
   /** Datum der letzten Durchführung (ISO YYYY-MM-DD). */
   last_done: string | null;
   /** Standort/Werkstatt, wo es erledigt wurde (FK auf locations), oder null. */
@@ -97,6 +101,16 @@ export interface VehicleServiceLog {
   note: string | null;
   file_path: string | null;
   file_name: string | null;
+  created_at: string;
+}
+
+export interface VehicleOdometer {
+  id: string;
+  truck_id: string;
+  /** Datum der Ablesung (ISO YYYY-MM-DD). */
+  reading_date: string;
+  km: number;
+  note: string | null;
   created_at: string;
 }
 
