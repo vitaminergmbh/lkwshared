@@ -117,6 +117,7 @@ export {
   HEAVY_CATEGORIES,
   isHeavyVehicle,
   kindsForCategory,
+  kindsForTruck,
   daysUntil,
   deadlineLevel,
   deadlineSortKey,

@@ -14,6 +14,8 @@ export interface DeadlineKind {
   appliesTo: DeadlineAppliesTo;
   /** Standard-Intervall in Monaten (Vorschlag für „erledigt → nächster Termin"). */
   defaultIntervalMonths: number | null;
+  /** Nur relevant, wenn das Fahrzeug eine Hebebühne hat (has_liftgate). */
+  requiresLiftgate?: boolean;
   hint?: string;
 }
 
@@ -31,8 +33,7 @@ export const DEADLINE_KINDS: DeadlineKind[] = [
   { key: 'sp', label: 'Sicherheitsprüfung (SP)', short: 'SP', category: 'pflicht', appliesTo: 'lkw', defaultIntervalMonths: 6, hint: 'LKW > 7,5 t: erstmals 42 Mon. nach EZ, dann alle 6 Monate.' },
   { key: 'tacho', label: 'Tachograph-Nacheichung', short: 'Tacho', category: 'pflicht', appliesTo: 'lkw', defaultIntervalMonths: 24, hint: 'Digitaler Tacho: alle 2 Jahre (§ 57b StVZO).' },
   { key: 'uvv', label: 'UVV-Fahrzeugprüfung', short: 'UVV', category: 'pflicht', appliesTo: 'all', defaultIntervalMonths: 12, hint: 'Jährlich für alle gewerblich genutzten Fahrzeuge (DGUV V70).' },
-  { key: 'ladebordwand', label: 'Ladebordwand / Hebebühne', short: 'Hebebühne', category: 'pflicht', appliesTo: 'lkw', defaultIntervalMonths: 12, hint: 'Jährliche UVV-Prüfung durch Sachkundigen.' },
-  { key: 'zurrmittel', label: 'Ladungssicherung (Zurrmittel)', short: 'Zurrmittel', category: 'pflicht', appliesTo: 'lkw', defaultIntervalMonths: 12, hint: 'Jährliche Prüfung der Zurrgurte/-mittel.' },
+  { key: 'ladebordwand', label: 'Ladebordwand / Hebebühne', short: 'Hebebühne', category: 'pflicht', appliesTo: 'lkw', requiresLiftgate: true, defaultIntervalMonths: 12, hint: 'Jährliche UVV-Prüfung durch Sachkundigen (nur mit Hebebühne).' },
   // — Wartung & Verschleiß —
   { key: 'service', label: 'Inspektion / Service', short: 'Service', category: 'wartung', appliesTo: 'all', defaultIntervalMonths: 12, hint: 'Nach Herstellervorgabe (Zeit oder km).' },
   { key: 'oil', label: 'Ölwechsel', short: 'Öl', category: 'wartung', appliesTo: 'all', defaultIntervalMonths: 12, hint: 'Meist mit dem Service; LKW oft km-basiert.' },
@@ -57,6 +58,19 @@ export const DEADLINE_CATEGORY_LABELS: Record<DeadlineCategory, string> = {
 export function kindsForCategory(category: string | null | undefined): DeadlineKind[] {
   const heavy = isHeavyVehicle(category);
   return DEADLINE_KINDS.filter((k) => k.appliesTo === 'all' || heavy);
+}
+
+/** Kinds für ein konkretes Fahrzeug — berücksichtigt Kategorie und Hebebühne. */
+export function kindsForTruck(
+  category: string | null | undefined,
+  hasLiftgate: boolean | null | undefined,
+): DeadlineKind[] {
+  const heavy = isHeavyVehicle(category);
+  return DEADLINE_KINDS.filter((k) => {
+    if (k.appliesTo === 'lkw' && !heavy) return false;
+    if (k.requiresLiftgate && !hasLiftgate) return false;
+    return true;
+  });
 }
 
 // === Status / Ampel ===
