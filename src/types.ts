@@ -83,6 +83,23 @@ export interface VehicleDocument {
   updated_at: string;
 }
 
+export interface VehicleServiceLog {
+  id: string;
+  truck_id: string;
+  /** Datum der Arbeit (ISO YYYY-MM-DD). */
+  service_date: string;
+  /** Was gemacht wurde, z.B. „Zündkerzen erneuert". */
+  description: string;
+  /** Werkstatt (Freitext), z.B. „Werkstatt Meyer". */
+  workshop: string | null;
+  cost: number | null;
+  odometer_km: number | null;
+  note: string | null;
+  file_path: string | null;
+  file_name: string | null;
+  created_at: string;
+}
+
 export interface Truck {
   id: string;
   name: string;
