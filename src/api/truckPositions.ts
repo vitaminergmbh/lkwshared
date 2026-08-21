@@ -1,5 +1,5 @@
 import { getSupabase } from '../supabase';
-import type { TruckPosition } from '../types';
+import type { GpsProvider, SensorReading, TruckPosition } from '../types';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface TruckPositionRow {
@@ -12,6 +12,8 @@ interface TruckPositionRow {
   fetched_at: string;
   geofence_name?: string | null;
   geofence_since?: string | null;
+  sensors?: SensorReading[] | null;
+  provider?: GpsProvider | null;
 }
 
 function rowToPosition(row: TruckPositionRow): TruckPosition {
@@ -24,6 +26,8 @@ function rowToPosition(row: TruckPositionRow): TruckPosition {
     timestamp: row.recorded_at,
     geofence_name: row.geofence_name ?? null,
     geofence_since: row.geofence_since ?? null,
+    sensors: Array.isArray(row.sensors) ? row.sensors : [],
+    provider: row.provider ?? null,
   };
 }
 

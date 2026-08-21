@@ -114,11 +114,23 @@ export interface VehicleOdometer {
   created_at: string;
 }
 
+/** Quelle der Live-Position: PAJ-Tracker oder eigener Teltonika ueber Flespi. */
+export type GpsProvider = 'paj' | 'flespi';
+
 export interface Truck {
   id: string;
   name: string;
   license_plate: string | null;
   paj_device_id: string | null;
+  /**
+   * Aktive GPS-Quelle. Beide Geraete-IDs duerfen parallel gepflegt sein.
+   * Optional, weil die Spalte einen DB-Default ('paj') hat und aeltere
+   * Clients sie beim Anlegen nicht mitschicken.
+   */
+  gps_provider?: GpsProvider;
+  flespi_device_id?: string | null;
+  /** Bezeichnung der BLE-Sensoren je Slot, z.B. { "1": "Laderaum" }. */
+  sensor_labels?: Record<string, string>;
   color: string;
   category: string | null;
   height_cm: number | null;
@@ -139,6 +151,19 @@ export interface Truck {
 
 // === Live Tracking ===
 
+/** Messwerte eines BLE-Temperaturfuehlers (Teltonika EYE) zur letzten Position. */
+export interface SensorReading {
+  /** Sensor-Nummer laut Tracker-Konfiguration (1..4). */
+  slot: number;
+  temperature: number | null;
+  humidity?: number | null;
+  /** Batteriespannung des Sensors in Volt. */
+  battery_v?: number | null;
+  mac?: string | null;
+  /** Zeitpunkt der Messung — kann aelter sein als die Position. */
+  timestamp?: string | null;
+}
+
 export interface TruckPosition {
   truck_id: string;
   latitude: number;
@@ -151,6 +176,24 @@ export interface TruckPosition {
   geofence_name?: string | null;
   /** Zeitpunkt, seit dem das Fahrzeug ununterbrochen in diesem Geofence steht. */
   geofence_since?: string | null;
+  /** Aktuelle Temperaturfuehler-Werte (nur bei eigenem GPS gefuellt). */
+  sensors?: SensorReading[];
+  /** Quelle dieser Position. */
+  provider?: GpsProvider | null;
+}
+
+/** Historischer Messwert fuer den Kuehlketten-Nachweis. */
+export interface TemperatureReading {
+  id: string;
+  truck_id: string;
+  slot: number;
+  temperature: number;
+  humidity: number | null;
+  battery_v: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  recorded_at: string;
+  created_at: string;
 }
 
 export interface PajDevice {
