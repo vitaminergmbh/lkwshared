@@ -157,8 +157,12 @@ export interface SensorReading {
   slot: number;
   temperature: number | null;
   humidity?: number | null;
-  /** Batteriespannung des Sensors in Volt. */
+  /** Batteriespannung des Sensors in Volt — Hauptmassstab fuer den Ladezustand. */
   battery_v?: number | null;
+  /** Ladezustand in Prozent, falls der Tracker ihn meldet (EYE-Sensoren oft nicht). */
+  battery_pct?: number | null;
+  /** Eigenmeldung des Sensors: Batterie schwach. */
+  low_battery?: boolean | null;
   mac?: string | null;
   /** Zeitpunkt der Messung — kann aelter sein als die Position. */
   timestamp?: string | null;
