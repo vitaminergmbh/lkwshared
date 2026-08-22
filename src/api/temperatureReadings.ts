@@ -91,6 +91,23 @@ export function bucketMinutesFor(fromIso: string, toIso: string, slots = 4): num
   return Math.max(1, Math.ceil((minutes * slots) / 900));
 }
 
+/**
+ * Zeitpunkt der allerersten Messung eines Fahrzeugs, oder null.
+ * Damit kann die Oberflaeche einen leeren Zeitraum erklaeren, statt nur "keine
+ * Daten" zu zeigen — meist liegt der Zeitraum schlicht vor dem Aufzeichnungsstart.
+ */
+export async function getFirstRecordedAt(truckId: string): Promise<string | null> {
+  const { data, error } = await getSupabase()
+    .from('temperature_readings')
+    .select('recorded_at')
+    .eq('truck_id', truckId)
+    .order('recorded_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as { recorded_at: string } | null)?.recorded_at ?? null;
+}
+
 /** Letzter bekannter Messwert je Sensor eines Fahrzeugs. */
 export async function getLatestReadings(truckId: string): Promise<TemperatureReading[]> {
   const { data, error } = await getSupabase()
