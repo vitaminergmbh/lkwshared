@@ -41,6 +41,56 @@ export async function getReadings({
   return (data ?? []) as TemperatureReading[];
 }
 
+/** Ein verdichteter Punkt der Messreihe (Mittelwert eines Zeitfensters). */
+export interface TemperaturePoint {
+  slot: number;
+  recorded_at: string;
+  temperature: number;
+  humidity: number | null;
+  battery_v: number | null;
+}
+
+export interface TemperatureSeriesRange {
+  truckId: string;
+  from: string;
+  to: string;
+  /** Fenstergroesse in Minuten; 1 entspricht den Rohwerten. */
+  bucketMinutes?: number;
+}
+
+/**
+ * Verdichtete Messreihe ueber die Datenbankfunktion `temperature_series`.
+ *
+ * PostgREST liefert hoechstens 1000 Zeilen pro Abfrage — bei einem Messwert je
+ * Minute und Fuehler reicht das nicht einmal fuer einen Tag, die Kurve waere
+ * stillschweigend abgeschnitten. Die Funktion mittelt deshalb serverseitig in
+ * Zeitfenster; `bucketMinutesFor` waehlt das Fenster passend zum Zeitraum.
+ */
+export async function getSeries({
+  truckId,
+  from,
+  to,
+  bucketMinutes = 1,
+}: TemperatureSeriesRange): Promise<TemperaturePoint[]> {
+  const { data, error } = await getSupabase().rpc('temperature_series', {
+    p_truck_id: truckId,
+    p_from: from,
+    p_to: to,
+    p_bucket_minutes: Math.max(1, Math.round(bucketMinutes)),
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as TemperaturePoint[];
+}
+
+/**
+ * Fenstergroesse, die den Zeitraum unter ~900 Punkte je Abfrage haelt.
+ * `slots` ist die erwartete Zahl an Fuehlern (Teltonika: bis zu 4).
+ */
+export function bucketMinutesFor(fromIso: string, toIso: string, slots = 4): number {
+  const minutes = Math.max(1, (Date.parse(toIso) - Date.parse(fromIso)) / 60_000);
+  return Math.max(1, Math.ceil((minutes * slots) / 900));
+}
+
 /** Letzter bekannter Messwert je Sensor eines Fahrzeugs. */
 export async function getLatestReadings(truckId: string): Promise<TemperatureReading[]> {
   const { data, error } = await getSupabase()
