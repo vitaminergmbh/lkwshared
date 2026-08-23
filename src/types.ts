@@ -138,6 +138,11 @@ export interface Truck {
   length_cm: number | null;
   gross_weight_kg: number | null;
   axle_count: number;
+  /**
+   * Stellplaetze auf EPAL-Basis (120x80). null oder nicht gepflegt heisst:
+   * fuer dieses Fahrzeug wird keine Kapazitaet geprueft.
+   */
+  pallet_capacity?: number | null;
   /** Fahrzeug hat eine Hebebühne (Ladebordwand). */
   has_liftgate?: boolean;
   fuel_consumption_per_100km: number | null;
@@ -304,6 +309,10 @@ export interface TourStop {
   notes?: string | null;                  // Lade-/Entladeanweisungen für Fahrer
   load_note?: string | null;              // Beladungs-Info für Fahrer (Emoji + Freitext)
   unload_note?: string | null;            // Entladungs-Info für Fahrer (Emoji + Freitext)
+  /** An diesem Stop aufgenommene Paletten (Stellplaetze). */
+  pallets_load?: number;
+  /** An diesem Stop abgegebene Paletten. Erst entladen, dann laden. */
+  pallets_unload?: number;
   // Live tracking fields
   actual_arrival_eta: string | null;      // First time the geofence was entered
   actual_departure_eta: string | null;    // Time the geofence was left

@@ -47,6 +47,10 @@ export * as VehicleDocumentAPI from './api/vehicleDocuments';
 export * as ServiceLogAPI from './api/serviceLog';
 export * as OdometerAPI from './api/odometer';
 
+// === Paletten-Kapazitaet ===
+export { computeTourLoad } from './utils/palletLoad';
+export type { StopLoad, TourLoadResult } from './utils/palletLoad';
+
 // === Utils ===
 export {
   formatDuration,
