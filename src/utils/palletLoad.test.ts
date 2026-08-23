@@ -57,16 +57,45 @@ test('Nicht der Endbestand zaehlt, sondern der Hoechststand', () => {
   assert.equal(r.hasOverload, true, 'Ueberladung darf nicht durchrutschen, nur weil die Tour leer endet');
 });
 
-test('Fahrzeugwechsel mitten in der Tour senkt die Kapazitaet', () => {
+test('Fahrzeugwechsel: das neue Fahrzeug startet leer', () => {
+  // Der Bestand des alten Fahrzeugs faehrt nicht mit — es bleibt ja stehen.
   const stops = [
-    stop('a', 0, 16, 0),            // startet im 15t (Kapazitaet 18)
-    stop('b', 1, 0, 0, 'klein'),    // ab hier 7,2t (Kapazitaet 8)
+    stop('a', 0, 16, 0),             // 16 im ersten Fahrzeug
+    stop('b', 1, 0, 0, 'zweit'),     // hier wird gewechselt, nichts bewegt
+  ];
+  const r = computeTourLoad(stops, [truck('erst', 18), truck('zweit', 33)], 'erst');
+
+  assert.equal(r.byStop.get('b')!.truckChanged, true);
+  assert.equal(r.byStop.get('b')!.before, 0, 'das neue Fahrzeug faengt leer an');
+  assert.equal(r.byStop.get('b')!.after, 0);
+  assert.equal(r.byStop.get('b')!.capacity, 33, 'ab hier gilt die Kapazitaet des neuen Fahrzeugs');
+});
+
+test('Fahrzeugwechsel mit Umladung: nur die frische Ladung zaehlt', () => {
+  // Der Fall aus der Praxis: mit 4 Paletten ankommen, Fahrzeug tauschen,
+  // 22 aufnehmen und 1 abgeben. Im neuen Fahrzeug liegen dann 21 — nicht 25.
+  const stops = [
+    stop('a', 0, 4, 0),
+    stop('b', 1, 22, 1, 'gross'),
+  ];
+  const r = computeTourLoad(stops, [truck('klein', 18), truck('gross', 33)], 'klein');
+
+  assert.equal(r.byStop.get('b')!.after, 21);
+  assert.equal(r.byStop.get('b')!.negative, false, 'die Abgabe stammt aus der frischen Ladung');
+  assert.equal(r.byStop.get('b')!.capacity, 33);
+  assert.equal(r.hasOverload, false);
+});
+
+test('Fahrzeugwechsel auf ein kleineres Fahrzeug meldet Ueberladung', () => {
+  const stops = [
+    stop('a', 0, 2, 0),
+    stop('b', 1, 16, 0, 'klein'),   // 16 in ein Fahrzeug mit 8 Plaetzen
   ];
   const r = computeTourLoad(stops, [truck('gross', 18), truck('klein', 8)], 'gross');
 
-  assert.equal(r.byStop.get('a')!.overloaded, false, '16 passen in den 15t');
+  assert.equal(r.byStop.get('b')!.after, 16);
   assert.equal(r.byStop.get('b')!.capacity, 8);
-  assert.equal(r.byStop.get('b')!.overloaded, true, '16 passen nicht in den 7,2t');
+  assert.equal(r.byStop.get('b')!.overloaded, true);
   assert.equal(r.hasOverload, true);
 });
 

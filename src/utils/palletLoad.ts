@@ -26,6 +26,11 @@ export interface StopLoad {
   after: number;
   /** Kapazitaet des Fahrzeugs, das ab hier faehrt; null = nicht gepflegt. */
   capacity: number | null;
+  /**
+   * An diesem Stop wird das Fahrzeug gewechselt. Der Bestand des vorherigen
+   * Fahrzeugs faehrt dann NICHT mit — das neue startet leer.
+   */
+  truckChanged: boolean;
   /** Bestand bei Abfahrt uebersteigt die Kapazitaet. */
   overloaded: boolean;
   /**
@@ -49,19 +54,6 @@ export interface TourLoadResult {
   hasData: boolean;
 }
 
-/**
- * Fahrzeug, das ab dem Stop mit Index `i` faehrt: das zuletzt gesetzte
- * `truck_id` bis einschliesslich hier, sonst das Fahrzeug der Tour.
- */
-function truckIdForStop(stops: TourStop[], i: number, tourTruckId: string | null): string | null {
-  let id = tourTruckId;
-  for (let k = 0; k <= i; k++) {
-    const s = stops[k]?.truck_id;
-    if (s) id = s;
-  }
-  return id;
-}
-
 export function computeTourLoad(
   stops: TourStop[],
   trucks: Array<Pick<Truck, 'id' | 'pallet_capacity'>>,
@@ -79,21 +71,38 @@ export function computeTourLoad(
   let hasOverload = false;
   let hasNegative = false;
   let hasData = false;
+  // `truck_id` an einem Stop heisst: ab hier faehrt ein anderes Fahrzeug. Das
+  // Segment, das diesen Stop verlaesst, gehoert also schon zum neuen.
+  let activeTruckId: string | null = tourTruckId;
 
-  ordered.forEach((stop, i) => {
+  ordered.forEach((stop) => {
     const loaded = stop.pallets_load ?? 0;
     const unloaded = stop.pallets_unload ?? 0;
     if (loaded > 0 || unloaded > 0) hasData = true;
 
-    const before = onBoard;
-    const negative = unloaded > before;
-    // Bei zu viel Entladung nicht ins Minus laufen — sonst verschiebt der
-    // Fehler alle folgenden Staende. Gemeldet wird er ueber `negative`.
-    const afterUnload = Math.max(0, before - unloaded);
-    const after = afterUnload + loaded;
+    const truckChanged = !!stop.truck_id && stop.truck_id !== activeTruckId;
+    if (stop.truck_id) activeTruckId = stop.truck_id;
+    const capacity = activeTruckId ? capacityById.get(activeTruckId) ?? null : null;
 
-    const truckId = truckIdForStop(ordered, i, tourTruckId);
-    const capacity = truckId ? capacityById.get(truckId) ?? null : null;
+    let before: number;
+    let after: number;
+    let negative: boolean;
+
+    if (truckChanged) {
+      // Das neue Fahrzeug startet leer — was im alten lag, faehrt nicht mit.
+      // Was hier abgegeben wird, kann folglich nur aus der frischen Ladung
+      // stammen, deshalb wird schlicht verrechnet.
+      before = 0;
+      after = Math.max(0, loaded - unloaded);
+      negative = unloaded > loaded;
+    } else {
+      before = onBoard;
+      negative = unloaded > before;
+      // Bei zu viel Entladung nicht ins Minus laufen — sonst verschiebt der
+      // Fehler alle folgenden Staende. Gemeldet wird er ueber `negative`.
+      after = Math.max(0, before - unloaded) + loaded;
+    }
+
     const overloaded = capacity != null && after > capacity;
 
     if (negative) hasNegative = true;
@@ -103,7 +112,9 @@ export function computeTourLoad(
       peakCapacity = capacity;
     }
 
-    byStop.set(stop.id, { stopId: stop.id, before, loaded, unloaded, after, capacity, overloaded, negative });
+    byStop.set(stop.id, {
+      stopId: stop.id, before, loaded, unloaded, after, capacity, overloaded, negative, truckChanged,
+    });
     onBoard = after;
   });
 
