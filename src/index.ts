@@ -49,6 +49,10 @@ export * as OdometerAPI from './api/odometer';
 
 // === Paletten-Kapazitaet ===
 export { computeTourLoad } from './utils/palletLoad';
+
+// === Karten-Cluster ===
+export { clusterPoints, boundsOf } from './utils/mapCluster';
+export type { PixelPoint, PointCluster } from './utils/mapCluster';
 export type { StopLoad, TourLoadResult } from './utils/palletLoad';
 
 // === Utils ===
