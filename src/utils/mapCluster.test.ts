@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { clusterPoints, boundsOf } from './mapCluster.ts';
+import { clusterPoints, boundsOf, zoomToSeparate } from './mapCluster.ts';
 import type { PixelPoint } from './mapCluster.ts';
 
 function p(id: string, x: number, y: number, lat = x, lng = y): PixelPoint {
@@ -79,4 +79,54 @@ test('Ein einzelner Punkt ergibt ein Rechteck ohne Ausdehnung', () => {
   const b = boundsOf([{ lat: 51, lng: 12 }])!;
   assert.equal(b.south, b.north);
   assert.equal(b.west, b.east);
+});
+
+// === zoomToSeparate ===
+
+test('Halber Abstand zum Ziel heisst genau eine Zoomstufe mehr', () => {
+  // 32 px auseinander, gewuenscht sind 64 -> Faktor 2 -> eine Stufe.
+  const z = zoomToSeparate([{ x: 0, y: 0 }, { x: 32, y: 0 }], 64, 10, 20);
+  assert.equal(z, 11);
+});
+
+test('Ein Viertel des Ziels heisst zwei Stufen mehr', () => {
+  const z = zoomToSeparate([{ x: 0, y: 0 }, { x: 16, y: 0 }], 64, 10, 20);
+  assert.equal(z, 12);
+});
+
+test('Der Praxisfall: fuenf Fahrzeuge auf einem Hof werden wirklich getrennt', () => {
+  // So lagen sie beim Test auf der Karte: alle innerhalb weniger Pixel.
+  const punkte = [
+    { x: 0, y: 0 }, { x: 3, y: 2 }, { x: 6, y: 1 }, { x: 2, y: 5 }, { x: 8, y: 4 },
+  ];
+  const z = zoomToSeparate(punkte, 74, 12, 20);
+  // Gegenprobe: auf der errechneten Stufe darf nichts mehr zusammenfallen.
+  const faktor = 2 ** (z - 12);
+  const skaliert = punkte.map((p, i) => ({ id: `t${i}`, x: p.x * faktor, y: p.y * faktor, lat: 0, lng: 0 }));
+  const cluster = clusterPoints(skaliert, 64);
+  assert.equal(cluster.length, 5, 'nach dem Aufklappen steht jedes Fahrzeug einzeln');
+});
+
+test('Exakt dieselbe Koordinate laesst sich nicht auseinanderzoomen', () => {
+  const z = zoomToSeparate([{ x: 100, y: 100 }, { x: 100, y: 100 }], 64, 12, 20);
+  assert.equal(z, 20, 'dann bis zur Obergrenze, mehr geht nicht');
+});
+
+test('Die Obergrenze wird nie ueberschritten', () => {
+  const z = zoomToSeparate([{ x: 0, y: 0 }, { x: 0.01, y: 0 }], 64, 18, 20);
+  assert.equal(z, 20);
+});
+
+test('Ein Klick zoomt immer mindestens eine Stufe', () => {
+  // Schon weit genug auseinander — trotzdem soll sich etwas tun.
+  const z = zoomToSeparate([{ x: 0, y: 0 }, { x: 500, y: 0 }], 64, 10, 20);
+  assert.equal(z, 11);
+});
+
+test('Ein einzelner Punkt zoomt eine Stufe', () => {
+  assert.equal(zoomToSeparate([{ x: 0, y: 0 }], 64, 14, 20), 15);
+});
+
+test('An der Obergrenze bleibt es bei der Obergrenze', () => {
+  assert.equal(zoomToSeparate([{ x: 0, y: 0 }], 64, 20, 20), 20);
 });

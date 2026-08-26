@@ -88,3 +88,43 @@ export function boundsOf(points: Array<{ lat: number; lng: number }>): {
   }
   return { south, west, north, east };
 }
+
+/**
+ * Zoomstufe, auf der die uebergebenen Punkte nicht mehr zusammengefasst wuerden.
+ *
+ * Pro Zoomstufe verdoppelt sich der Pixelabstand zwischen zwei Koordinaten.
+ * Gesucht ist also der Faktor zwischen dem engsten aktuellen Abstand und dem
+ * gewuenschten Mindestabstand — und davon der Zweierlogarithmus.
+ *
+ * Ein blosses "auf das umschliessende Rechteck zoomen" reicht nicht: auf einem
+ * Betriebshof liegen die Fahrzeuge so dicht, dass sie auch im passenden
+ * Ausschnitt weiter uebereinander lagen.
+ *
+ * @param points  Weltpixel auf `currentZoom`.
+ * @param targetPx Abstand, den die Punkte danach mindestens haben sollen.
+ */
+export function zoomToSeparate(
+  points: Array<{ x: number; y: number }>,
+  targetPx: number,
+  currentZoom: number,
+  maxZoom: number,
+): number {
+  // Ein Klick soll immer etwas bewirken, deshalb mindestens eine Stufe.
+  const mindestens = Math.min(currentZoom + 1, maxZoom);
+  if (points.length < 2) return mindestens;
+
+  let engster = Infinity;
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      const d = Math.hypot(points[i]!.x - points[j]!.x, points[i]!.y - points[j]!.y);
+      if (d < engster) engster = d;
+    }
+  }
+
+  // Abstand null heisst: exakt dieselbe Koordinate. Da hilft kein Zoom mehr,
+  // dann wird bis zur Obergrenze aufgezogen.
+  if (!(engster > 0) || !Number.isFinite(engster)) return maxZoom;
+
+  const noetig = Math.ceil(currentZoom + Math.log2(targetPx / engster));
+  return Math.min(maxZoom, Math.max(mindestens, noetig));
+}
