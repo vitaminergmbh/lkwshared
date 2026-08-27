@@ -52,6 +52,10 @@ export { computeTourLoad } from './utils/palletLoad';
 
 // === Karten-Cluster ===
 export { clusterPoints, boundsOf, zoomToSeparate } from './utils/mapCluster';
+
+// === Ladungen (Obertouren) ===
+export { splitIntoLoads, checkLoads, numberLoadsOfDay } from './utils/tourLoads';
+export type { LoadStop, TourLoad, LoadCheck } from './utils/tourLoads';
 export type { PixelPoint, PointCluster } from './utils/mapCluster';
 export type { StopLoad, TourLoadResult } from './utils/palletLoad';
 
