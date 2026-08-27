@@ -45,6 +45,7 @@ export * as WarehouseAPI from './api/warehouseSensors';
 export type { TemperatureRange, TemperaturePoint, TemperatureSeriesRange } from './api/temperatureReadings';
 export type {
   WarehouseSensor, WarehouseLatest, WarehousePoint, WarehouseSeriesRange, WarehouseState, SensorPatch,
+  SignalState,
 } from './api/warehouseSensors';
 export * as VehicleDeadlineAPI from './api/vehicleDeadlines';
 export * as VehicleDocumentAPI from './api/vehicleDocuments';

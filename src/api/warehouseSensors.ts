@@ -17,6 +17,9 @@ export interface WarehouseSensor {
   min_c: number | null;
   max_c: number | null;
   last_seen_at: string | null;
+  /** Fester Platz auf der Karte; von Hand gesetzt, nicht gefunkt. */
+  latitude: number | null;
+  longitude: number | null;
   created_at: string;
 }
 
@@ -34,6 +37,10 @@ export interface WarehouseLatest {
   humidity: number | null;
   battery_v: number | null;
   recorded_at: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  /** Empfangsstaerke am Router in dBm; naeher an 0 ist besser. */
+  rssi: number | null;
 }
 
 export interface WarehousePoint {
@@ -44,6 +51,17 @@ export interface WarehousePoint {
   battery_v: number | null;
 }
 
+/**
+ * PostgREST liefert numeric als Zeichenkette. Fuer Anzeige reicht das, fuer
+ * Rechnen und Kartenkoordinaten nicht — deshalb hier einmal sauber umwandeln,
+ * statt an jeder Aufrufstelle Number() zu streuen.
+ */
+function alsZahl(wert: unknown): number | null {
+  if (wert == null) return null;
+  const n = Number(wert);
+  return Number.isFinite(n) ? n : null;
+}
+
 /** Aktueller Stand aller Fuehler, benannte zuerst. */
 export async function getLatest(): Promise<WarehouseLatest[]> {
   const { data, error } = await getSupabase()
@@ -51,9 +69,24 @@ export async function getLatest(): Promise<WarehouseLatest[]> {
     .select('*');
   if (error) throw new Error(error.message);
 
-  return ((data ?? []) as WarehouseLatest[]).sort(
-    (a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name, 'de'),
-  );
+  return ((data ?? []) as WarehouseLatest[])
+    .map((r) => ({
+      ...r,
+      temperature: alsZahl(r.temperature),
+      humidity: alsZahl(r.humidity),
+      battery_v: alsZahl(r.battery_v),
+      min_c: alsZahl(r.min_c),
+      max_c: alsZahl(r.max_c),
+      latitude: alsZahl(r.latitude),
+      longitude: alsZahl(r.longitude),
+      rssi: alsZahl(r.rssi),
+    }))
+    .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name, 'de'));
+}
+
+/** Fuehler mit festem Platz auf der Karte. */
+export function withPosition(rows: WarehouseLatest[]): WarehouseLatest[] {
+  return rows.filter((r) => r.active && r.latitude != null && r.longitude != null);
 }
 
 export async function listSensors(): Promise<WarehouseSensor[]> {
@@ -66,7 +99,9 @@ export async function listSensors(): Promise<WarehouseSensor[]> {
   return (data ?? []) as WarehouseSensor[];
 }
 
-export type SensorPatch = Partial<Pick<WarehouseSensor, 'name' | 'active' | 'sort_order' | 'min_c' | 'max_c'>>;
+export type SensorPatch = Partial<
+  Pick<WarehouseSensor, 'name' | 'active' | 'sort_order' | 'min_c' | 'max_c' | 'latitude' | 'longitude'>
+>;
 
 export async function updateSensor(id: string, patch: SensorPatch): Promise<WarehouseSensor> {
   const { data, error } = await getSupabase()
@@ -134,6 +169,23 @@ export function rangeState(row: Pick<WarehouseLatest, 'temperature' | 'min_c' | 
   if (row.min_c != null && v < Number(row.min_c)) return 'warn';
   if (row.max_c != null && v > Number(row.max_c)) return 'warn';
   return 'ok';
+}
+
+/**
+ * Empfangsqualitaet eines Fuehlers.
+ *
+ * Die Schwellen sind fuer BLE in einer Halle gewaehlt: bis -70 dBm steht die
+ * Verbindung stabil, ab -85 reisst sie in der Praxis immer wieder ab. Der Wert
+ * ist die Vorwarnung — ein Fuehler faellt selten ploetzlich aus, sein Signal
+ * wird vorher schlechter (Batterie, neue Palettenreihe davor, Tuer zu).
+ */
+export type SignalState = 'gut' | 'mittel' | 'schwach' | 'unbekannt';
+
+export function signalState(rssi: number | null | undefined): SignalState {
+  if (rssi == null || !Number.isFinite(rssi)) return 'unbekannt';
+  if (rssi >= -70) return 'gut';
+  if (rssi >= -85) return 'mittel';
+  return 'schwach';
 }
 
 /**
