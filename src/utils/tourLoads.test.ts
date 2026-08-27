@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { splitIntoLoads, checkLoads, numberLoadsOfDay } from './tourLoads.ts';
+import { splitIntoLoads, checkLoads, numberLoadsOfDay, activeTruckIdAt } from './tourLoads.ts';
 import type { LoadStop } from './tourLoads.ts';
 
 function depot(index: number, departure?: string): LoadStop {
@@ -116,4 +116,34 @@ test('Zwei Ladungen desselben Fahrzeugs bekommen verschiedene Nummern', () => {
   ]);
   assert.deepEqual(nummeriert.map((l) => l.tourNumber), [1, 2, 3]);
   assert.equal(nummeriert[1]!.tourId, 't2', 'nach Abfahrt sortiert, nicht nach Fahrzeug');
+});
+
+// === activeTruckIdAt ===
+
+test('Ohne Wechsel faehrt ueberall das Fahrzeug der Tour', () => {
+  const stops = [{}, {}, {}];
+  assert.equal(activeTruckIdAt(stops, 'tour-lkw', 0), 'tour-lkw');
+  assert.equal(activeTruckIdAt(stops, 'tour-lkw', 2), 'tour-lkw');
+});
+
+test('Der Wechsel gilt erst fuer den Abschnitt NACH dem Stopp', () => {
+  // An Stopp 1 wird gewechselt: die Fahrt DORTHIN ist noch das alte Fahrzeug.
+  const stops = [{}, { truck_id: 'neu' }, {}];
+  assert.equal(activeTruckIdAt(stops, 'alt', 1), 'alt', 'Anfahrt zum Wechselstopp');
+  assert.equal(activeTruckIdAt(stops, 'alt', 2), 'neu', 'danach das neue');
+});
+
+test('Mehrere Wechsel: es zaehlt der letzte davor', () => {
+  const stops = [{ truck_id: 'a' }, {}, { truck_id: 'b' }, {}];
+  assert.equal(activeTruckIdAt(stops, 'start', 1), 'a');
+  assert.equal(activeTruckIdAt(stops, 'start', 3), 'b');
+});
+
+test('Ohne Index liefert sie das Fahrzeug am Ende der Tour', () => {
+  const stops = [{ truck_id: 'a' }, { truck_id: 'b' }];
+  assert.equal(activeTruckIdAt(stops, 'start'), 'b');
+});
+
+test('Ohne Fahrzeug an der Tour und ohne Wechsel bleibt es leer', () => {
+  assert.equal(activeTruckIdAt([{}, {}], null, 2), null);
 });

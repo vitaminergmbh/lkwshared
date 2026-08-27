@@ -124,3 +124,26 @@ export function numberLoadsOfDay<T extends { departure: string | null; tourId: s
   });
   return sortiert.map((load, i) => ({ ...load, tourNumber: i + 1 }));
 }
+
+/**
+ * Fahrzeug, das den Abschnitt ZU dem Stopp mit Position `index` faehrt.
+ *
+ * `truck_id` an einem Stopp heisst "ab hier ein anderes Fahrzeug": der Wechsel
+ * geschieht am Stopp, der Abschnitt dorthin gehoert noch zum vorherigen
+ * Fahrzeug. Deshalb zaehlen nur Wechsel an Stopps *vor* `index`.
+ *
+ * Wird ohne `index` aufgerufen, liefert die Funktion das Fahrzeug nach allen
+ * Wechseln — also das, mit dem die Tour endet.
+ */
+export function activeTruckIdAt(
+  stops: Array<{ truck_id?: string | null }>,
+  tourTruckId: string | null,
+  index: number = Number.MAX_SAFE_INTEGER,
+): string | null {
+  let aktiv = tourTruckId;
+  for (let i = 0; i < Math.min(index, stops.length); i++) {
+    const id = stops[i]?.truck_id;
+    if (id) aktiv = id;
+  }
+  return aktiv;
+}
