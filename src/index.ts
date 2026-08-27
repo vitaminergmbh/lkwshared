@@ -55,6 +55,10 @@ export { clusterPoints, boundsOf, zoomToSeparate } from './utils/mapCluster';
 
 // === Ladungen (Obertouren) ===
 export { splitIntoLoads, checkLoads, numberLoadsOfDay, activeTruckIdAt } from './utils/tourLoads';
+
+// === Sprache der Tourennachricht ===
+export { shareTexts, formatDurationIn, isDriverLanguage, DRIVER_LANGUAGES } from './utils/shareTexts';
+export type { DriverLanguage } from './utils/shareTexts';
 export type { LoadStop, TourLoad, LoadCheck } from './utils/tourLoads';
 export type { PixelPoint, PointCluster } from './utils/mapCluster';
 export type { StopLoad, TourLoadResult } from './utils/palletLoad';

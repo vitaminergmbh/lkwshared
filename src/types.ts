@@ -227,6 +227,8 @@ export interface Driver {
   notes: string | null;
   active: boolean;
   created_at: string;
+  /** Sprache der Tourennachricht (de, uk, ru, pl, en). */
+  language?: string;
 }
 
 // === Cargo / Laderaum ===
