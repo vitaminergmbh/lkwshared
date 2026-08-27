@@ -41,7 +41,11 @@ export * as SettingsAPI from './api/settings';
 export * as DriverAPI from './api/drivers';
 export * as TruckPositionsAPI from './api/truckPositions';
 export * as TemperatureAPI from './api/temperatureReadings';
+export * as WarehouseAPI from './api/warehouseSensors';
 export type { TemperatureRange, TemperaturePoint, TemperatureSeriesRange } from './api/temperatureReadings';
+export type {
+  WarehouseSensor, WarehouseLatest, WarehousePoint, WarehouseSeriesRange, WarehouseState, SensorPatch,
+} from './api/warehouseSensors';
 export * as VehicleDeadlineAPI from './api/vehicleDeadlines';
 export * as VehicleDocumentAPI from './api/vehicleDocuments';
 export * as ServiceLogAPI from './api/serviceLog';
