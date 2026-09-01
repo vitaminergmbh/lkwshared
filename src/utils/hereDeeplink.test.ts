@@ -7,7 +7,7 @@ const LEUNA = { latitude: 51.316700, longitude: 11.990000, label: '[00] LEUNA' }
 const KUNDE = { latitude: 51.839290, longitude: 12.187550, label: 'Nicole Sopora' };
 
 /** Der ACTROS aus dem Bestand: 40 t, 4,00 m hoch, 2,55 m breit, 16,50 m lang. */
-const ACTROS = { gross_weight_kg: 40000, height_cm: 400, width_cm: 255, length_cm: 1650, axle_count: 5 };
+const ACTROS = { gross_weight_kg: 40000, height_cm: 400, width_cm: 255, length_cm: 1650 };
 
 test('Zwei Punkte ergeben eine Route mit Titeln', () => {
   const url = buildHereRouteUrl([DESSAU, LEUNA]);
@@ -20,7 +20,7 @@ test('Zwei Punkte ergeben eine Route mit Titeln', () => {
 test('LKW-Modus haengt Masse an, in den Einheiten von HERE', () => {
   const url = buildHereRouteUrl([DESSAU, LEUNA], ACTROS, { truck: true });
   // Gewicht in kg, Masse in cm — genau so stehen sie am Fahrzeug.
-  assert.match(url!, /\?m=tr&vw=40000&vdh=400&vdl=1650&vdw=255&vax=5$/);
+  assert.match(url!, /\?m=tr&vw=40000&vdh=400&vdl=1650&vdw=255$/);
 });
 
 test('Ohne LKW-Modus bleiben Masse und Modus weg', () => {
@@ -133,15 +133,13 @@ test('Ganze Tonnen behalten ihre Stellen', () => {
   assert.equal(formatVehicleDimensions({ gross_weight_kg: 3500 }), '3,5 t');
 });
 
-test('Die Achszahl faehrt mit', () => {
-  // HERE warnt: "Nicht angegebene Werte überschreiben alte Einstellungen".
-  // Ohne vax setzt die App die Achsen auf ihren Standard 2 — beim Sattelzug
-  // mit fünf Achsen ändert das Maut und Streckenfreigaben.
-  const url = buildHereRouteUrl([DESSAU, LEUNA], ACTROS, { truck: true });
-  assert.match(url!, /vax=5/);
-});
 
-test('Ohne gepflegte Achszahl bleibt der Parameter weg', () => {
-  const url = buildHereRouteUrl([DESSAU, LEUNA], { gross_weight_kg: 7200 }, { truck: true });
+test('Die Achszahl bleibt draussen', () => {
+  // Am ACTROS (40 t, 5 Achsen) mit vax=5 geprueft: HERE WeGo zeigte im
+  // Bestaetigungsdialog weiterhin "Achsen: k. A. (2)", waehrend Hoehe,
+  // Breite, Laenge und Gewicht aus demselben Link ankamen. Der Parameter tut
+  // nichts und macht die URL nur laenger — dieser Test haelt den Befund fest,
+  // damit er nicht ein zweites Mal ausprobiert wird.
+  const url = buildHereRouteUrl([DESSAU, LEUNA], { ...ACTROS, axle_count: 5 } as never, { truck: true });
   assert.equal(url!.includes('vax'), false);
 });
