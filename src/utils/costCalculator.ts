@@ -90,7 +90,20 @@ export function calculateTourCosts(
   // Driver cost is always for full tour duration (same driver)
   const driverCost = (totalDuration / 60) * settings.driver_hourly_wage;
 
-  const totalCost = fuelCost + tollCost + driverCost + rentalCost;
+  /**
+   * Erst runden, dann summieren — nicht umgekehrt.
+   *
+   * Die Posten werden einzeln in Cent angezeigt. Bildet man die Summe aus den
+   * ungerundeten Werten, koennen sich die abgeschnittenen Bruchteile zu einem
+   * Cent aufaddieren, und die Leiste zeigt eine Summe, die nicht zu ihren
+   * eigenen Zahlen passt. Bei einer Preisliste, die zum Kunden geht, ist eine
+   * nachrechenbare Summe mehr wert als der theoretisch genauere Wert.
+   */
+  const fuel = round2(fuelCost);
+  const toll = round2(tollCost);
+  const driver = round2(driverCost);
+  const rental = round2(rentalCost);
+  const totalCost = round2(fuel + toll + driver + rental);
 
   /**
    * Gemeinkosten und Gewinn als Zuschlagskalkulation.
@@ -105,21 +118,21 @@ export function calculateTourCosts(
    * erzielte Marge liegt darunter und wird in der Oberflaeche daneben
    * ausgewiesen, damit beim Verhandeln keine Zahl fehlt.
    */
-  const overheadCost = totalCost * ((settings.overhead_percent ?? 0) / 100);
-  const ownCost = totalCost + overheadCost;
-  const profit = ownCost * ((settings.profit_percent ?? 0) / 100);
-  const price = ownCost + profit;
+  const overheadCost = round2(totalCost * ((settings.overhead_percent ?? 0) / 100));
+  const ownCost = round2(totalCost + overheadCost);
+  const profit = round2(ownCost * ((settings.profit_percent ?? 0) / 100));
+  const price = round2(ownCost + profit);
 
   return {
-    fuelCost: round2(fuelCost),
-    tollCost: round2(tollCost),
-    driverCost: round2(driverCost),
-    rentalCost: round2(rentalCost),
-    totalCost: round2(totalCost),
-    overheadCost: round2(overheadCost),
-    ownCost: round2(ownCost),
-    profit: round2(profit),
-    price: round2(price),
+    fuelCost: fuel,
+    tollCost: toll,
+    driverCost: driver,
+    rentalCost: rental,
+    totalCost,
+    overheadCost,
+    ownCost,
+    profit,
+    price,
   };
 }
 

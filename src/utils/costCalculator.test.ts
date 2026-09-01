@@ -71,9 +71,58 @@ test('Marge ohne Preis ergibt null statt einer Division durch null', () => {
   assert.equal(marginPercent(10, -5), 0);
 });
 
-test('Betraege werden auf Cent gerundet', () => {
-  // 3h 20min = 3,3333 h * 25 = 83,3333 EUR, +7 % = 89,17 EUR.
+test('Die Kette rechnet mit den angezeigten Betraegen weiter', () => {
+  // 3h 20min * 25 = 83,3333 EUR, angezeigt als 83,33. Sieben Prozent davon
+  // sind 5,83, macht 89,16 Preis.
+  //
+  // Mathematisch genauer waeren 89,17 — sieben Prozent auf die ungerundeten
+  // 83,3333. Dann stuende in der Leiste aber ein Preis, der sich aus ihren
+  // eigenen Zeilen nicht ergibt. Bei Zahlen, die zum Kunden gehen, wiegt
+  // Nachrechenbarkeit schwerer als der halbe Cent.
   const k = calculateTourCosts(0, 200, NACKTER_LKW, { ...LOHN, overhead_percent: 7 });
   assert.equal(k.totalCost, 83.33);
-  assert.equal(k.price, 89.17);
+  assert.equal(k.overheadCost, 5.83);
+  assert.equal(k.price, 89.16);
 });
+
+test('Die Summe passt zu den angezeigten Posten, nicht nur zur Mathematik', () => {
+  // Aus der Praxis: Kraftstoff 63,88, Maut 25,78, Fahrer 117,00, Miete 60,81
+  // ergaben in der Leiste 267,46 statt 267,47 — die Posten waren einzeln auf
+  // Cent gerundet, die Summe aber aus den ungerundeten Werten gebildet.
+  //
+  // Die Zahlen hier sind so gewaehlt, dass sich genau dieser Cent aufbaut:
+  // 64,09494 und 60,81485 runden beide ab, zusammen um fast einen ganzen Cent.
+  const lkw = {
+    id: 't2', name: 'Krumm', fuel_consumption_per_100km: 26,
+    emission_class: null, co2_class: null, gross_weight_kg: null, axle_count: null,
+    monthly_rent_eur: 519.785, monthly_km_estimate: 1000,
+  } as unknown as Truck;
+
+  const k = calculateTourCosts(117, 260, lkw, { fuel_price_per_liter: 2.107, driver_hourly_wage: 27 });
+
+  assert.equal(k.fuelCost, 64.09);
+  assert.equal(k.rentalCost, 60.81);
+  assert.equal(k.driverCost, 117);
+  assert.equal(k.totalCost, 241.9, 'Summe der angezeigten Posten, nicht 241,91');
+  assert.equal(k.fuelCost + k.tollCost + k.driverCost + k.rentalCost, k.totalCost);
+});
+
+test('Auch Selbstkosten und Preis bleiben nachrechenbar', () => {
+  const lkw = {
+    id: 't3', name: 'Krumm', fuel_consumption_per_100km: 26,
+    emission_class: null, co2_class: null, gross_weight_kg: null, axle_count: null,
+    monthly_rent_eur: 519.785, monthly_km_estimate: 1000,
+  } as unknown as Truck;
+
+  const k = calculateTourCosts(117, 260, lkw, {
+    fuel_price_per_liter: 2.107, driver_hourly_wage: 27,
+    overhead_percent: 15, profit_percent: 20,
+  });
+
+  assert.equal(round(k.totalCost + k.overheadCost), k.ownCost);
+  assert.equal(round(k.ownCost + k.profit), k.price);
+});
+
+function round(n: number): number {
+  return Math.round(n * 100) / 100;
+}
