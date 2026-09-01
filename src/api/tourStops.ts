@@ -116,6 +116,8 @@ export async function updateTourStopsBatch(
         time_window_ok: stop.time_window_ok,
         break_needed_before: stop.break_needed_before,
         route_polyline: stop.route_polyline,
+        auto_break: stop.auto_break ?? null,
+        daily_rest_minutes: stop.daily_rest_minutes ?? null,
       })
       .eq('id', stop.id);
     if (error) throw new Error(error.message);

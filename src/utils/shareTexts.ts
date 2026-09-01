@@ -60,6 +60,26 @@ interface Bausteine {
   hoch: string;
   breit: string;
   lang: string;
+
+  // --- Fahrerseite (/fahrer/<token>) ---
+  naechsterStop: string;
+  erledigt: string;
+  /** "12 Min. hinter Plan" */
+  hinterPlan: (min: number) => string;
+  /** "8 Min. Puffer" */
+  puffer: (min: number) => string;
+  imPlan: string;
+  voraussichtlich: string;
+  ankunft: string;
+  standzeit: string;
+  aufladen: string;
+  abladen: string;
+  tourBeendet: string;
+  /** "Stand 10:32" — Zeitpunkt der letzten Aktualisierung. */
+  stand: string;
+  linkAbgelaufen: string;
+  linkUngueltig: string;
+  nichtAbrufbar: string;
 }
 
 const TEXTE: Record<DriverLanguage, Bausteine> = {
@@ -77,6 +97,13 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     stop: 'Stop', min: 'Min.', std: 'h', stdMin: 'min', uhr: ' Uhr',
     fahrzeugMasse: 'Fahrzeugmaße',
     hoch: 'hoch', breit: 'breit', lang: 'lang',
+    naechsterStop: 'Nächster Stop', erledigt: 'Erledigt',
+    hinterPlan: (m) => `${m} Min. hinter Plan`, puffer: (m) => `${m} Min. Puffer`,
+    imPlan: 'Im Plan', voraussichtlich: 'voraussichtlich', ankunft: 'Ankunft',
+    standzeit: 'Standzeit', aufladen: 'Aufladen', abladen: 'Abladen',
+    tourBeendet: 'Tour beendet', stand: 'Stand',
+    linkAbgelaufen: 'Dieser Link ist abgelaufen', linkUngueltig: 'Link ungültig',
+    nichtAbrufbar: 'Daten gerade nicht abrufbar',
   },
   uk: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водій',
@@ -92,6 +119,13 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     stop: 'Зупинка', min: 'хв', std: 'год', stdMin: 'хв', uhr: '',
     fahrzeugMasse: 'Габарити транспорту',
     hoch: 'заввишки', breit: 'завширшки', lang: 'завдовжки',
+    naechsterStop: 'Наступна зупинка', erledigt: 'Виконано',
+    hinterPlan: (m) => `${m} хв відставання`, puffer: (m) => `${m} хв запасу`,
+    imPlan: 'За планом', voraussichtlich: 'орієнтовно', ankunft: 'Прибуття',
+    standzeit: 'Час на місці', aufladen: 'Завантажити', abladen: 'Розвантажити',
+    tourBeendet: 'Маршрут завершено', stand: 'Станом на',
+    linkAbgelaufen: 'Це посилання застаріло', linkUngueltig: 'Недійсне посилання',
+    nichtAbrufbar: 'Дані зараз недоступні',
   },
   ru: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водитель',
@@ -107,6 +141,13 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     stop: 'Остановка', min: 'мин', std: 'ч', stdMin: 'мин', uhr: '',
     fahrzeugMasse: 'Габариты транспорта',
     hoch: 'высота', breit: 'ширина', lang: 'длина',
+    naechsterStop: 'Следующая остановка', erledigt: 'Выполнено',
+    hinterPlan: (m) => `${m} мин отставания`, puffer: (m) => `${m} мин запаса`,
+    imPlan: 'По плану', voraussichtlich: 'ориентировочно', ankunft: 'Прибытие',
+    standzeit: 'Время на месте', aufladen: 'Загрузить', abladen: 'Выгрузить',
+    tourBeendet: 'Маршрут завершён', stand: 'По состоянию на',
+    linkAbgelaufen: 'Эта ссылка устарела', linkUngueltig: 'Недействительная ссылка',
+    nichtAbrufbar: 'Данные сейчас недоступны',
   },
   pl: {
     tour: 'Trasa', datum: 'Data', fahrer: 'Kierowca',
@@ -122,6 +163,13 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     stop: 'Przystanek', min: 'min', std: 'godz', stdMin: 'min', uhr: '',
     fahrzeugMasse: 'Wymiary pojazdu',
     hoch: 'wysokość', breit: 'szerokość', lang: 'długość',
+    naechsterStop: 'Następny przystanek', erledigt: 'Zrobione',
+    hinterPlan: (m) => `${m} min opóźnienia`, puffer: (m) => `${m} min zapasu`,
+    imPlan: 'Zgodnie z planem', voraussichtlich: 'przewidywane', ankunft: 'Przyjazd',
+    standzeit: 'Czas postoju', aufladen: 'Załadunek', abladen: 'Rozładunek',
+    tourBeendet: 'Trasa zakończona', stand: 'Stan na',
+    linkAbgelaufen: 'Ten link wygasł', linkUngueltig: 'Nieprawidłowy link',
+    nichtAbrufbar: 'Dane chwilowo niedostępne',
   },
   en: {
     tour: 'Tour', datum: 'Date', fahrer: 'Driver',
@@ -137,6 +185,13 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     stop: 'Stop', min: 'min', std: 'h', stdMin: 'min', uhr: '',
     fahrzeugMasse: 'Vehicle dimensions',
     hoch: 'high', breit: 'wide', lang: 'long',
+    naechsterStop: 'Next stop', erledigt: 'Done',
+    hinterPlan: (m) => `${m} min behind schedule`, puffer: (m) => `${m} min ahead`,
+    imPlan: 'On schedule', voraussichtlich: 'expected', ankunft: 'Arrival',
+    standzeit: 'Time on site', aufladen: 'Load', abladen: 'Unload',
+    tourBeendet: 'Tour finished', stand: 'As of',
+    linkAbgelaufen: 'This link has expired', linkUngueltig: 'Invalid link',
+    nichtAbrufbar: 'Data currently unavailable',
   },
 };
 

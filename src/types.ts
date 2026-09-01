@@ -272,6 +272,8 @@ export interface Tour {
   name: string;
   truck_id: string | null;
   live_truck_id: string | null;
+  /** Schluessel des Fahrerlinks (/fahrer/<token>); entsteht in der Datenbank. */
+  driver_token?: string | null;
   date: string | null;
   start_time: string | null;
   status: TourStatus;
@@ -341,6 +343,14 @@ export interface TourStop {
   live_status: LiveStopStatus;            // pending | driving | arrived | loading | departed
   /** HERE Flexible Polyline of the route segment from previous stop TO this stop */
   route_polyline: string | null;
+  /**
+   * Lenkzeitpause auf der Fahrt zu diesem Stop, wie der Planer sie beim
+   * Berechnen ermittelt hat. Gespeichert, damit die Fahrerseite sie zeigen
+   * kann, ohne die Tour nachzurechnen. Minuten.
+   */
+  auto_break?: { driveBeforeBreak: number; breakDuration: number; driveAfterBreak: number } | null;
+  /** Tagesruhe (Minuten) vor der Fahrt zu diesem Stop. */
+  daily_rest_minutes?: number | null;
   /** ETA recalculated by the live-tracker via HERE after each departure event.
    * Used in the UI in place of arrival_eta until actual_arrival_eta lands. */
   projected_arrival_eta: string | null;
