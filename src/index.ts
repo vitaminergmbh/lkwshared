@@ -51,6 +51,7 @@ export * as VehicleDeadlineAPI from './api/vehicleDeadlines';
 export * as VehicleDocumentAPI from './api/vehicleDocuments';
 export * as ServiceLogAPI from './api/serviceLog';
 export * as OdometerAPI from './api/odometer';
+export * as ShortLinkAPI from './api/shortLinks';
 
 // === Paletten-Kapazitaet ===
 export { computeTourLoad } from './utils/palletLoad';
