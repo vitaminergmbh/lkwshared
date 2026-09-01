@@ -11,9 +11,20 @@
  *
  * Die Wegpunkte trennt ein Schraegstrich, der Titel ist optional und folgt
  * nach dem zweiten Komma. `m=tr` waehlt die LKW-Route (setzt eine
- * WeGo-Pro-Lizenz voraus), die Fahrzeugmasse kommen als Abfrageparameter:
- * Gewicht in Kilogramm, Hoehe, Laenge und Breite in Zentimetern — also genau
- * so, wie sie bei uns am Fahrzeug stehen.
+ * WeGo-Pro-Lizenz voraus; ohne Lizenz zeigt die App eine Autoroute), die
+ * Fahrzeugdaten kommen als Abfrageparameter:
+ *
+ *   vw    Gesamtgewicht in kg
+ *   vdh   Hoehe in cm
+ *   vdl   Laenge in cm
+ *   vdw   Breite in cm
+ *   axc   Achszahl (2 bis 13)
+ *   trt   Bauart: "straight" (Solo) oder "tractor" (Sattelzugmaschine)
+ *
+ * Masse und Achszahl stehen bei uns bereits in diesen Einheiten am Fahrzeug.
+ * Nicht genutzt, weil es die Daten nicht gibt und der Fuhrpark sie nicht
+ * braucht: wpax (Achslast), axgw* (Achsgruppengewichte), hmr (Gefahrgut),
+ * tcr (Tunnelkategorie).
  */
 
 const BASIS = 'https://share.here.com/r/';
@@ -39,25 +50,23 @@ export interface HereWaypoint {
   label?: string | null;
 }
 
-/**
- * Die Masse, die HERE fuer die LKW-Route braucht. Fehlende bleiben weg.
- *
- * Die Achszahl steht bewusst NICHT hier. Ein Versuch mit `vax=5` am ACTROS
- * (40 t, 5 Achsen) zeigte im Bestaetigungsdialog von HERE WeGo weiterhin
- * "Achsen: k. A. (2)", waehrend Hoehe, Breite, Laenge und Gewicht aus
- * demselben Link korrekt ankamen — der Parameter wird also ignoriert.
- * Weitere Schreibweisen sind in der auffindbaren Dokumentation nicht belegt.
- *
- * Folge: HERE rechnet mit zwei Achsen, also mit einer hoeheren Last je Achse
- * als tatsaechlich vorhanden. Das faellt zugunsten der Sicherheit aus —
- * strengere Streckenwahl statt einer Freigabe, die nicht traegt.
- */
+/** Bauart laut HERE: Solo-LKW oder Sattelzugmaschine. */
+export type HereTruckType = 'straight' | 'tractor';
+
+/** Die Fahrzeugdaten, die HERE fuer die LKW-Route auswertet. Fehlende bleiben weg. */
 export interface HereVehicle {
   gross_weight_kg?: number | null;
   height_cm?: number | null;
   width_cm?: number | null;
   length_cm?: number | null;
+  /** Achszahl; HERE nimmt 2 bis 13. */
+  axle_count?: number | null;
+  truck_type?: HereTruckType | string | null;
 }
+
+/** Grenzen laut HERE-Dokumentation. */
+const ACHSEN_MIN = 2;
+const ACHSEN_MAX = 13;
 
 export interface HereRouteOptions {
   /**
@@ -102,7 +111,22 @@ function masse(v: HereVehicle | null | undefined): Record<string, number> {
   setze('vdh', v.height_cm);
   setze('vdl', v.length_cm);
   setze('vdw', v.width_cm);
+
+  // Achszahl nur im zugelassenen Bereich. Ein Wert ausserhalb wuerde von HERE
+  // entweder verworfen oder — schlimmer — geklemmt; dann stuende dort still
+  // eine Zahl, die niemand gesetzt hat.
+  const achsen = v.axle_count;
+  if (typeof achsen === 'number' && Number.isInteger(achsen)
+      && achsen >= ACHSEN_MIN && achsen <= ACHSEN_MAX) {
+    raus.axc = achsen;
+  }
   return raus;
+}
+
+/** Bauart, sofern gepflegt und bekannt. */
+function bauart(v: HereVehicle | null | undefined): HereTruckType | null {
+  const t = v?.truck_type;
+  return t === 'straight' || t === 'tractor' ? t : null;
 }
 
 /**
@@ -131,6 +155,8 @@ export function buildHereRouteUrl(
   if (options.truck) {
     parameter.m = 'tr';
     Object.assign(parameter, masse(vehicle));
+    const art = bauart(vehicle);
+    if (art) parameter.trt = art;
   }
 
   const query = Object.entries(parameter)

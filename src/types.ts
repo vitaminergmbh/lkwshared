@@ -138,6 +138,8 @@ export interface Truck {
   length_cm: number | null;
   gross_weight_kg: number | null;
   axle_count: number;
+  /** Bauart fuer die LKW-Navigation: 'straight' (Solo) oder 'tractor' (Sattelzug). */
+  truck_type: string | null;
   /**
    * Stellplaetze auf EPAL-Basis (120x80). null oder nicht gepflegt heisst:
    * fuer dieses Fahrzeug wird keine Kapazitaet geprueft.

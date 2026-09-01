@@ -134,12 +134,45 @@ test('Ganze Tonnen behalten ihre Stellen', () => {
 });
 
 
-test('Die Achszahl bleibt draussen', () => {
-  // Am ACTROS (40 t, 5 Achsen) mit vax=5 geprueft: HERE WeGo zeigte im
-  // Bestaetigungsdialog weiterhin "Achsen: k. A. (2)", waehrend Hoehe,
-  // Breite, Laenge und Gewicht aus demselben Link ankamen. Der Parameter tut
-  // nichts und macht die URL nur laenger — dieser Test haelt den Befund fest,
-  // damit er nicht ein zweites Mal ausprobiert wird.
-  const url = buildHereRouteUrl([DESSAU, LEUNA], { ...ACTROS, axle_count: 5 } as never, { truck: true });
-  assert.equal(url!.includes('vax'), false);
+
+// === Achszahl und Bauart ===
+
+test('Achszahl und Bauart gehen als axc und trt mit', () => {
+  // Der erste Versuch lief mit "vax" und wurde von HERE stillschweigend
+  // ignoriert — der Dialog zeigte weiter "Achsen: k. A. (2)". Laut
+  // Dokumentation heissen die Parameter axc und trt.
+  const url = buildHereRouteUrl(
+    [DESSAU, LEUNA],
+    { ...ACTROS, axle_count: 5, truck_type: 'tractor' },
+    { truck: true },
+  );
+  assert.match(url!, /&axc=5/);
+  assert.match(url!, /&trt=tractor$/);
+});
+
+test('Achszahlen ausserhalb 2 bis 13 bleiben weg', () => {
+  // HERE nennt diesen Bereich. Ein Wert davor oder danach wuerde entweder
+  // verworfen oder geklemmt — dann stuende dort eine Zahl, die niemand
+  // gesetzt hat.
+  for (const achsen of [0, 1, 14, 99, -2, 2.5]) {
+    const url = buildHereRouteUrl([DESSAU, LEUNA], { axle_count: achsen }, { truck: true });
+    assert.equal(url!.includes('axc'), false, `${achsen} haette wegfallen muessen`);
+  }
+  assert.match(buildHereRouteUrl([DESSAU, LEUNA], { axle_count: 2 }, { truck: true })!, /axc=2/);
+  assert.match(buildHereRouteUrl([DESSAU, LEUNA], { axle_count: 13 }, { truck: true })!, /axc=13/);
+});
+
+test('Ungepflegte Bauart bleibt weg statt geraten zu werden', () => {
+  // Ein Solo-LKW auf "tractor" gesetzt bekaeme Strecken verwehrt, die er
+  // fahren koennte — und andersherum welche freigegeben, die er nicht schafft.
+  for (const art of [null, undefined, '', 'LKW', 'Sattelzug']) {
+    const url = buildHereRouteUrl([DESSAU, LEUNA], { truck_type: art }, { truck: true });
+    assert.equal(url!.includes('trt'), false, `"${art}" haette wegfallen muessen`);
+  }
+});
+
+test('Ohne LKW-Modus bleiben auch Achsen und Bauart weg', () => {
+  const url = buildHereRouteUrl([DESSAU, LEUNA], { axle_count: 5, truck_type: 'tractor' });
+  assert.equal(url!.includes('axc'), false);
+  assert.equal(url!.includes('trt'), false);
 });
