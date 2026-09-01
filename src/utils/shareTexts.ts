@@ -54,8 +54,6 @@ interface Bausteine {
   stdMin: string;
   /** Steht im Deutschen hinter der Uhrzeit ("17:40 Uhr"), sonst meist leer. */
   uhr: string;
-  /** Einladung zum Routenlink, z.B. "Route in HERE WeGo oeffnen". */
-  routeOeffnen: string;
   /** Ueberschrift der Fahrzeugmasse vor dem Link. */
   fahrzeugMasse: string;
   /** "4,00 m hoch" — das Wort hinter dem Mass. */
@@ -77,7 +75,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     restfahrzeit: 'Restfahrzeit', endeCa: 'Ende ca.',
     fahrzeit: 'Fahrzeit', lenkzeit: 'LKW-Lenkzeit', gesamt: 'Gesamt',
     stop: 'Stop', min: 'Min.', std: 'h', stdMin: 'min', uhr: ' Uhr',
-    routeOeffnen: 'Route in HERE WeGo öffnen', fahrzeugMasse: 'Fahrzeugmaße',
+    fahrzeugMasse: 'Fahrzeugmaße',
     hoch: 'hoch', breit: 'breit', lang: 'lang',
   },
   uk: {
@@ -92,7 +90,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     restfahrzeit: 'Залишок часу в дорозі', endeCa: 'Кінець прибл.',
     fahrzeit: 'Час у дорозі', lenkzeit: 'Час керування вантажівкою', gesamt: 'Разом',
     stop: 'Зупинка', min: 'хв', std: 'год', stdMin: 'хв', uhr: '',
-    routeOeffnen: 'Відкрити маршрут у HERE WeGo', fahrzeugMasse: 'Габарити транспорту',
+    fahrzeugMasse: 'Габарити транспорту',
     hoch: 'заввишки', breit: 'завширшки', lang: 'завдовжки',
   },
   ru: {
@@ -107,7 +105,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     restfahrzeit: 'Оставшееся время в пути', endeCa: 'Конец прибл.',
     fahrzeit: 'Время в пути', lenkzeit: 'Время управления грузовиком', gesamt: 'Всего',
     stop: 'Остановка', min: 'мин', std: 'ч', stdMin: 'мин', uhr: '',
-    routeOeffnen: 'Открыть маршрут в HERE WeGo', fahrzeugMasse: 'Габариты транспорта',
+    fahrzeugMasse: 'Габариты транспорта',
     hoch: 'высота', breit: 'ширина', lang: 'длина',
   },
   pl: {
@@ -122,7 +120,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     restfahrzeit: 'Pozostały czas jazdy', endeCa: 'Koniec ok.',
     fahrzeit: 'Czas jazdy', lenkzeit: 'Czas prowadzenia ciężarówki', gesamt: 'Razem',
     stop: 'Przystanek', min: 'min', std: 'godz', stdMin: 'min', uhr: '',
-    routeOeffnen: 'Otwórz trasę w HERE WeGo', fahrzeugMasse: 'Wymiary pojazdu',
+    fahrzeugMasse: 'Wymiary pojazdu',
     hoch: 'wysokość', breit: 'szerokość', lang: 'długość',
   },
   en: {
@@ -137,7 +135,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     restfahrzeit: 'Remaining drive time', endeCa: 'End approx.',
     fahrzeit: 'Drive time', lenkzeit: 'Truck driving time', gesamt: 'Total',
     stop: 'Stop', min: 'min', std: 'h', stdMin: 'min', uhr: '',
-    routeOeffnen: 'Open route in HERE WeGo', fahrzeugMasse: 'Vehicle dimensions',
+    fahrzeugMasse: 'Vehicle dimensions',
     hoch: 'high', breit: 'wide', lang: 'long',
   },
 };
