@@ -59,7 +59,7 @@ export { computeTourLoad } from './utils/palletLoad';
 export { clusterPoints, boundsOf, zoomToSeparate } from './utils/mapCluster';
 
 // === HERE WeGo ===
-export { buildHereRouteUrl, formatVehicleDimensions } from './utils/hereDeeplink';
+export { buildHereRouteUrl, buildHereStopUrl, formatVehicleDimensions } from './utils/hereDeeplink';
 export type { HereWaypoint, HereVehicle, HereRouteOptions } from './utils/hereDeeplink';
 
 // === Ladungen (Obertouren) ===

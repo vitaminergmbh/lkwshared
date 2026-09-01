@@ -131,6 +131,23 @@ function bauart(v: HereVehicle | null | undefined): HereTruckType | null {
   return t === 'straight' || t === 'tractor' ? t : null;
 }
 
+/** Ein Wegpunkt als Pfadstueck: "51.32469,12.15517,LEUNA". */
+function wegpunkt(w: HereWaypoint): string {
+  const la = w.latitude!.toFixed(KOMMASTELLEN);
+  const lo = w.longitude!.toFixed(KOMMASTELLEN);
+  const t = titel(w.label);
+  return t ? `${la},${lo},${t}` : `${la},${lo}`;
+}
+
+/** Abfrageteil mit Modus und Fahrzeugdaten, oder leer. */
+function abfrage(vehicle: HereVehicle | null | undefined, options: HereRouteOptions): string {
+  if (!options.truck) return '';
+  const parameter: Record<string, string | number> = { m: 'tr', ...masse(vehicle) };
+  const art = bauart(vehicle);
+  if (art) parameter.trt = art;
+  return '?' + Object.entries(parameter).map(([k, v]) => `${k}=${v}`).join('&');
+}
+
 /**
  * Link zur Route. Gibt null zurueck, wenn daraus keine sinnvolle Route wird —
  * ein Link, der beim Fahrer ins Leere fuehrt, ist schlechter als keiner.
@@ -144,28 +161,28 @@ export function buildHereRouteUrl(
   // Eine Route braucht mindestens Start und Ziel.
   if (punkte.length < 2 || punkte.length > MAX_WEGPUNKTE) return null;
 
-  const pfad = punkte
-    .map((w) => {
-      const la = w.latitude!.toFixed(KOMMASTELLEN);
-      const lo = w.longitude!.toFixed(KOMMASTELLEN);
-      const t = titel(w.label);
-      return t ? `${la},${lo},${t}` : `${la},${lo}`;
-    })
-    .join('/');
+  return `${BASIS}${punkte.map(wegpunkt).join('/')}${abfrage(vehicle, options)}`;
+}
 
-  const parameter: Record<string, string | number> = {};
-  if (options.truck) {
-    parameter.m = 'tr';
-    Object.assign(parameter, masse(vehicle));
-    const art = bauart(vehicle);
-    if (art) parameter.trt = art;
-  }
-
-  const query = Object.entries(parameter)
-    .map(([k, v]) => `${k}=${v}`)
-    .join('&');
-
-  return query ? `${BASIS}${pfad}?${query}` : `${BASIS}${pfad}`;
+/**
+ * Link zu einem einzelnen Stop: Navigation vom aktuellen Standort dorthin.
+ *
+ * `mylocation` ueberlaesst der App den Startpunkt — der Fahrer tippt und
+ * faehrt los, egal wo er gerade steht. Bewusst eine Route und kein blosser
+ * Kartenpunkt (`/l/`): wer unterwegs auf einen Stop tippt, will hin, nicht
+ * hinsehen.
+ *
+ * Die Fahrzeugdaten gehen genauso mit wie beim Tourlink. Ohne sie waere der
+ * Einzellink die Luecke, durch die der Zug doch noch unter die zu niedrige
+ * Bruecke faehrt.
+ */
+export function buildHereStopUrl(
+  waypoint: HereWaypoint,
+  vehicle?: HereVehicle | null,
+  options: HereRouteOptions = {},
+): string | null {
+  if (!gueltig(waypoint)) return null;
+  return `${BASIS}mylocation/${wegpunkt(waypoint)}${abfrage(vehicle, options)}`;
 }
 
 /**

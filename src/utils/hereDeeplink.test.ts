@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildHereRouteUrl, formatVehicleDimensions } from './hereDeeplink.ts';
+import { buildHereRouteUrl, buildHereStopUrl, formatVehicleDimensions } from './hereDeeplink.ts';
 
 const DESSAU = { latitude: 51.828601, longitude: 12.232326, label: '[00] DESSAU' };
 const LEUNA = { latitude: 51.316700, longitude: 11.990000, label: '[00] LEUNA' };
@@ -188,4 +188,34 @@ test('Die Masse stehen in der Sprache des Fahrers', () => {
 test('Ohne Sprache bleibt es deutsch', () => {
   assert.equal(formatVehicleDimensions(ACTROS), '40 t · 4,00 m hoch · 2,55 m breit · 16,50 m lang');
   assert.equal(formatVehicleDimensions(ACTROS, 'kli'), '40 t · 4,00 m hoch · 2,55 m breit · 16,50 m lang');
+});
+
+// === Einzelner Stop ===
+
+test('Der Stop-Link navigiert vom aktuellen Standort dorthin', () => {
+  // mylocation ueberlaesst der App den Startpunkt: der Fahrer tippt und faehrt
+  // los, egal wo er gerade steht.
+  const url = buildHereStopUrl(KUNDE, ACTROS, { truck: true });
+  assert.match(url!, /^https:\/\/share\.here\.com\/r\/mylocation\/51\.83929,12\.18755,Nicole%20Sopora\?/);
+});
+
+test('Auch der Stop-Link traegt die Fahrzeugdaten', () => {
+  // Ohne sie waere er die Luecke, durch die der Zug doch noch unter die zu
+  // niedrige Bruecke faehrt.
+  const url = buildHereStopUrl(KUNDE, { ...ACTROS, axle_count: 5, truck_type: 'tractor' }, { truck: true });
+  assert.match(url!, /m=tr/);
+  assert.match(url!, /vdh=400/);
+  assert.match(url!, /axc=5/);
+  assert.match(url!, /trt=tractor/);
+});
+
+test('Ohne LKW-Modus bleibt der Stop-Link nackt', () => {
+  const url = buildHereStopUrl(KUNDE, ACTROS);
+  assert.equal(url, 'https://share.here.com/r/mylocation/51.83929,12.18755,Nicole%20Sopora');
+});
+
+test('Ohne brauchbare Koordinate gibt es keinen Stop-Link', () => {
+  assert.equal(buildHereStopUrl({ latitude: null, longitude: null }), null);
+  assert.equal(buildHereStopUrl({ latitude: 0, longitude: 0 }), null);
+  assert.equal(buildHereStopUrl({ latitude: 95, longitude: 12 }), null);
 });
