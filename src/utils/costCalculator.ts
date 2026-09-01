@@ -4,6 +4,10 @@ import { getTollRatePerKm } from './tollRates';
 export interface CostSettings {
   fuel_price_per_liter: number;  // EUR
   driver_hourly_wage: number;    // EUR
+  /** Zuschlag auf die direkten Kosten in Prozent. 0 = kein Zuschlag. */
+  overhead_percent?: number;
+  /** Aufschlag auf die Selbstkosten in Prozent. 0 = kein Aufschlag. */
+  profit_percent?: number;
 }
 
 export interface CostBreakdown {
@@ -11,7 +15,16 @@ export interface CostBreakdown {
   tollCost: number;    // EUR
   driverCost: number;  // EUR
   rentalCost: number;  // EUR
+  /** Direkte Kosten der Fahrt, ohne Gemeinkosten und Gewinn. */
   totalCost: number;   // EUR
+  /** Gemeinkostenzuschlag auf die direkten Kosten. */
+  overheadCost: number;
+  /** Direkte Kosten + Gemeinkosten — was die Tour uns kostet. */
+  ownCost: number;
+  /** Gewinnaufschlag auf die Selbstkosten. */
+  profit: number;
+  /** Selbstkosten + Gewinn — der Betrag fuer die Rechnung. */
+  price: number;
 }
 
 export interface TruckSegment {
@@ -79,11 +92,43 @@ export function calculateTourCosts(
 
   const totalCost = fuelCost + tollCost + driverCost + rentalCost;
 
+  /**
+   * Gemeinkosten und Gewinn als Zuschlagskalkulation.
+   *
+   * Die Gemeinkosten liegen auf den direkten Kosten, der Gewinn auf den
+   * Selbstkosten — also auch auf den Gemeinkosten. Wer beides nebeneinander
+   * auf die direkten Kosten schluege, wuerde die Verwaltung mitverdienen
+   * lassen, aber nicht mit einrechnen.
+   *
+   * Der Gewinnsatz ist ein Aufschlag auf die Selbstkosten, keine Marge vom
+   * Umsatz: 20 % auf 100 EUR ergeben 120 EUR Preis, nicht 125. Die tatsaechlich
+   * erzielte Marge liegt darunter und wird in der Oberflaeche daneben
+   * ausgewiesen, damit beim Verhandeln keine Zahl fehlt.
+   */
+  const overheadCost = totalCost * ((settings.overhead_percent ?? 0) / 100);
+  const ownCost = totalCost + overheadCost;
+  const profit = ownCost * ((settings.profit_percent ?? 0) / 100);
+  const price = ownCost + profit;
+
   return {
     fuelCost: round2(fuelCost),
     tollCost: round2(tollCost),
     driverCost: round2(driverCost),
     rentalCost: round2(rentalCost),
     totalCost: round2(totalCost),
+    overheadCost: round2(overheadCost),
+    ownCost: round2(ownCost),
+    profit: round2(profit),
+    price: round2(price),
   };
+}
+
+/**
+ * Umsatzrendite eines Preises: welcher Anteil des Rechnungsbetrags bleibt als
+ * Gewinn? Nicht dasselbe wie der Aufschlagssatz — 20 % Aufschlag ergeben rund
+ * 16,7 % Marge. Beim Verhandeln ist diese Zahl die gefragte.
+ */
+export function marginPercent(profit: number, price: number): number {
+  if (!Number.isFinite(price) || price <= 0) return 0;
+  return round2((profit / price) * 100);
 }

@@ -127,7 +127,7 @@ export type { PalletTypeDef } from './utils/constants';
 export { getTollRatePerKm } from './utils/tollRates';
 export type { TollRateInput } from './utils/tollRates';
 
-export { calculateTourCosts } from './utils/costCalculator';
+export { calculateTourCosts, marginPercent } from './utils/costCalculator';
 export type { CostSettings, CostBreakdown, TruckSegment } from './utils/costCalculator';
 
 // === Realtime ===

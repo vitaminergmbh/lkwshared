@@ -273,7 +273,10 @@ export interface Tour {
   total_toll_cost: number | null;    // Calculated toll cost (EUR)
   total_driver_cost: number | null;  // Calculated driver cost (EUR)
   total_rental_cost: number | null;  // Calculated rental cost (EUR)
-  total_cost: number | null;         // Calculated total cost (EUR)
+  total_cost: number | null;         // Direkte Kosten: Kraftstoff + Maut + Fahrer + Miete
+  total_overhead_cost: number | null; // Gemeinkostenzuschlag
+  total_profit: number | null;        // Gewinnaufschlag auf die Selbstkosten
+  total_price: number | null;         // Direkte Kosten + Gemeinkosten + Gewinn
   /** Optionaler Link, unter dem der Fahrer das Ladungs-Design sieht (Foto/PDF/URL) */
   cargo_link?: string | null;
   /** Im-App-Laderaum-Layout (Palettenanordnung) */
