@@ -31,18 +31,6 @@ import { shareTexts } from './shareTexts';
 
 const BASIS = 'https://share.here.com/r/';
 
-/** Ein einzelner Ort statt einer Route: HERE zeigt ihn auf der Karte. */
-const BASIS_ORT = 'https://share.here.com/l/';
-
-/**
- * Zoomstufe des Ortslinks.
- *
- * 17 ist Strassenebene — nah genug, um Einfahrt und Hofzufahrt zu sehen.
- * Die Mobil-App ignoriert den Wert derzeit, die Dokumentation nennt ihn fuer
- * Ortslinks trotzdem als Pflichtangabe; deshalb steht er drin.
- */
-const ORT_ZOOM = 17;
-
 /**
  * HERE nennt 100 Wegpunkte als Grenze und empfiehlt 50, weil Titel und
  * Geraete die URL vorher sprengen koennen. Unsere Touren liegen bei zehn; die
@@ -177,21 +165,24 @@ export function buildHereRouteUrl(
 }
 
 /**
- * Link zu einem einzelnen Stop: HERE zeigt den Ort auf der Karte.
+ * Link zu einem einzelnen Stop: Navigation vom aktuellen Standort dorthin.
  *
- * Der Fahrer sieht erst, wo es hingeht — Einfahrt, Hof, Umgebung — und
- * startet die Navigation selbst, wenn er soweit ist. Eine Route ab dem
- * aktuellen Standort (`/r/mylocation/...`) legt sofort los, was mitten in
- * einer laufenden Tour eher stoert als hilft.
+ * `mylocation` ueberlaesst der App den Startpunkt — der Fahrer tippt und
+ * faehrt los, egal wo er gerade steht. Bewusst eine Route und kein blosser
+ * Kartenpunkt (`/l/`): wer unterwegs auf einen Stop tippt, will hin, nicht
+ * hinsehen.
  *
- * Ohne Fahrzeugdaten: der Ortslink wertet sie nicht aus, und mitgegeben
- * wuerden sie bei jedem Antippen den Bestaetigungsdialog aufrufen. Die
- * Masse setzt der Tourlink am Anfang der Fahrt — danach rechnet die App
- * auch von hier aus mit dem richtigen Profil.
+ * Die Fahrzeugdaten gehen genauso mit wie beim Tourlink. Ohne sie waere der
+ * Einzellink die Luecke, durch die der Zug doch noch unter die zu niedrige
+ * Bruecke faehrt.
  */
-export function buildHereStopUrl(waypoint: HereWaypoint): string | null {
+export function buildHereStopUrl(
+  waypoint: HereWaypoint,
+  vehicle?: HereVehicle | null,
+  options: HereRouteOptions = {},
+): string | null {
   if (!gueltig(waypoint)) return null;
-  return `${BASIS_ORT}${wegpunkt(waypoint)}?z=${ORT_ZOOM}`;
+  return `${BASIS}mylocation/${wegpunkt(waypoint)}${abfrage(vehicle, options)}`;
 }
 
 /**

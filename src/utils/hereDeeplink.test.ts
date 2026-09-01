@@ -192,21 +192,26 @@ test('Ohne Sprache bleibt es deutsch', () => {
 
 // === Einzelner Stop ===
 
-test('Der Stop-Link zeigt den Ort auf der Karte', () => {
-  // /l/ statt /r/: der Fahrer sieht erst, wo es hingeht, und startet die
-  // Navigation selbst. Eine Route ab dem aktuellen Standort legt sofort los,
-  // was mitten in einer laufenden Tour eher stoert.
-  const url = buildHereStopUrl(KUNDE);
-  assert.equal(url, 'https://share.here.com/l/51.83929,12.18755,Nicole%20Sopora?z=17');
+test('Der Stop-Link navigiert vom aktuellen Standort dorthin', () => {
+  // mylocation ueberlaesst der App den Startpunkt: der Fahrer tippt und faehrt
+  // los, egal wo er gerade steht.
+  const url = buildHereStopUrl(KUNDE, ACTROS, { truck: true });
+  assert.match(url!, /^https:\/\/share\.here\.com\/r\/mylocation\/51\.83929,12\.18755,Nicole%20Sopora\?/);
 });
 
-test('Der Stop-Link traegt keine Fahrzeugdaten', () => {
-  // Der Ortslink wertet sie nicht aus, und mitgegeben wuerden sie bei jedem
-  // Antippen den Bestaetigungsdialog aufrufen. Die Masse setzt der Tourlink.
-  const url = buildHereStopUrl(KUNDE);
-  for (const p of ['m=tr', 'vw=', 'vdh=', 'axc=', 'trt=']) {
-    assert.equal(url!.includes(p), false, `${p} gehoert nicht in den Ortslink`);
-  }
+test('Auch der Stop-Link traegt die Fahrzeugdaten', () => {
+  // Ohne sie waere er die Luecke, durch die der Zug doch noch unter die zu
+  // niedrige Bruecke faehrt.
+  const url = buildHereStopUrl(KUNDE, { ...ACTROS, axle_count: 5, truck_type: 'tractor' }, { truck: true });
+  assert.match(url!, /m=tr/);
+  assert.match(url!, /vdh=400/);
+  assert.match(url!, /axc=5/);
+  assert.match(url!, /trt=tractor/);
+});
+
+test('Ohne LKW-Modus bleibt der Stop-Link nackt', () => {
+  const url = buildHereStopUrl(KUNDE, ACTROS);
+  assert.equal(url, 'https://share.here.com/r/mylocation/51.83929,12.18755,Nicole%20Sopora');
 });
 
 test('Ohne brauchbare Koordinate gibt es keinen Stop-Link', () => {
