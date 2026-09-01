@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { splitIntoLoads, checkLoads, numberLoadsOfDay, activeTruckIdAt } from './tourLoads.ts';
+import { splitIntoLoads, checkLoads, numberLoadsOfDay, activeTruckIdAt, splitByTruck } from './tourLoads.ts';
 import type { LoadStop } from './tourLoads.ts';
 
 function depot(index: number, departure?: string): LoadStop {
@@ -146,4 +146,49 @@ test('Ohne Index liefert sie das Fahrzeug am Ende der Tour', () => {
 
 test('Ohne Fahrzeug an der Tour und ohne Wechsel bleibt es leer', () => {
   assert.equal(activeTruckIdAt([{}, {}], null, 2), null);
+});
+
+// === splitByTruck ===
+
+const s = (truck_id?: string) => ({ truck_id: truck_id ?? null });
+
+test('Ohne Wechsel bleibt die Tour ein Abschnitt', () => {
+  const teile = splitByTruck([s(), s(), s()], 'lkw-a');
+  assert.equal(teile.length, 1);
+  assert.equal(teile[0]!.truckId, 'lkw-a');
+  assert.equal(teile[0]!.stops.length, 3);
+});
+
+test('Der Wechselstop gehoert zu beiden Abschnitten', () => {
+  // Mit dem alten Wagen faehrt man hin, mit dem neuen weiter. Fehlt die
+  // Ueberlappung, faengt die zweite Route erst am uebernaechsten Stop an.
+  const stops = [s(), s('lkw-b'), s(), s()];
+  const teile = splitByTruck(stops, 'lkw-a');
+  assert.equal(teile.length, 2);
+  assert.deepEqual(teile.map((t) => t.truckId), ['lkw-a', 'lkw-b']);
+  assert.equal(teile[0]!.stops.length, 2, 'Start + Wechselstop');
+  assert.equal(teile[1]!.stops.length, 3, 'Wechselstop + Rest');
+  assert.equal(teile[0]!.stops[1], teile[1]!.stops[0], 'derselbe Stop');
+});
+
+test('Zwei Wechsel ergeben drei Abschnitte', () => {
+  const teile = splitByTruck([s(), s('b'), s(), s('c'), s()], 'a');
+  assert.deepEqual(teile.map((t) => t.truckId), ['a', 'b', 'c']);
+});
+
+test('Ein Wechsel auf dasselbe Fahrzeug teilt nicht', () => {
+  const teile = splitByTruck([s(), s('a'), s()], 'a');
+  assert.equal(teile.length, 1);
+});
+
+test('Abschnitte mit nur einem Stop fallen weg', () => {
+  // Wechsel am letzten Stop: danach wird nichts mehr gefahren.
+  const teile = splitByTruck([s(), s(), s('b')], 'a');
+  assert.equal(teile.length, 1);
+  assert.equal(teile[0]!.truckId, 'a');
+});
+
+test('Leere Tour ergibt keine Abschnitte', () => {
+  assert.deepEqual(splitByTruck([], 'a'), []);
+  assert.deepEqual(splitByTruck([s()], 'a'), []);
 });

@@ -58,8 +58,12 @@ export { computeTourLoad } from './utils/palletLoad';
 // === Karten-Cluster ===
 export { clusterPoints, boundsOf, zoomToSeparate } from './utils/mapCluster';
 
+// === HERE WeGo ===
+export { buildHereRouteUrl, formatVehicleDimensions } from './utils/hereDeeplink';
+export type { HereWaypoint, HereVehicle, HereRouteOptions } from './utils/hereDeeplink';
+
 // === Ladungen (Obertouren) ===
-export { splitIntoLoads, checkLoads, numberLoadsOfDay, activeTruckIdAt } from './utils/tourLoads';
+export { splitIntoLoads, checkLoads, numberLoadsOfDay, activeTruckIdAt, splitByTruck } from './utils/tourLoads';
 
 // === Sprache der Tourennachricht ===
 export { shareTexts, formatDurationIn, isDriverLanguage, DRIVER_LANGUAGES } from './utils/shareTexts';
@@ -166,3 +170,4 @@ export type {
 export type { DeadlinePatch } from './api/vehicleDeadlines';
 export type { DocumentPatch } from './api/vehicleDocuments';
 export type { ServiceLogPatch } from './api/serviceLog';
+export type { TruckLeg } from './utils/tourLoads';

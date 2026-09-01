@@ -147,3 +147,42 @@ export function activeTruckIdAt(
   }
   return aktiv;
 }
+
+/** Ein Stueck Tour, das mit demselben Fahrzeug gefahren wird. */
+export interface TruckLeg<T> {
+  truckId: string | null;
+  stops: T[];
+}
+
+/**
+ * Tour in Abschnitte je Fahrzeug zerlegen.
+ *
+ * Der Wechsel haengt am Stop, ab dem das neue Fahrzeug faehrt — und gilt fuer
+ * die Fahrt DANACH. Der Wechselstop gehoert deshalb zu beiden Abschnitten: mit
+ * dem alten Wagen faehrt man hin, mit dem neuen weiter. Ohne diese
+ * Ueberlappung faenge die zweite Route erst am uebernaechsten Stop an, und dem
+ * Fahrer fehlte genau das Stueck, das er nach dem Umsetzen faehrt.
+ *
+ * Abschnitte mit weniger als zwei Stops fallen weg — daraus wird keine Route.
+ */
+export function splitByTruck<T extends { truck_id?: string | null }>(
+  stops: T[],
+  startTruckId: string | null,
+): Array<TruckLeg<T>> {
+  if (stops.length === 0) return [];
+
+  const abschnitte: Array<TruckLeg<T>> = [];
+  let aktuell: TruckLeg<T> = { truckId: startTruckId, stops: [] };
+
+  for (const stop of stops) {
+    aktuell.stops.push(stop);
+    const wechsel = stop.truck_id;
+    if (wechsel && wechsel !== aktuell.truckId) {
+      abschnitte.push(aktuell);
+      aktuell = { truckId: wechsel, stops: [stop] };
+    }
+  }
+  abschnitte.push(aktuell);
+
+  return abschnitte.filter((a) => a.stops.length >= 2);
+}
