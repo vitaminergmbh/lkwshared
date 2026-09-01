@@ -32,6 +32,20 @@ export interface Location {
    * Useful for sites near highways or with irregular shapes to avoid false positives.
    */
   geofence_polygon: Coordinates[] | null;
+  /**
+   * Gekuerzter Kartenlink des Standorts.
+   *
+   * Liegt am Standort und nicht an der Nachricht: eine Koordinate bleibt
+   * monatelang gleich, der Kurzlink also auch. Frueher wurde er bei jedem
+   * Kopieren neu erzeugt — acht Stops, acht Anfragen, jedes Mal.
+   */
+  maps_short_url?: string | null;
+  /**
+   * Volle URL, zu der der Kurzlink gehoert. Wird der Marker verschoben,
+   * passt sie nicht mehr und der Kurzlink wird neu geholt — sonst schickt
+   * er den Fahrer weiter an die alte Stelle.
+   */
+  maps_short_source?: string | null;
   /** Soft-delete flag — archived locations are hidden from lists but preserved for historic tour references */
   archived: boolean;
   created_at: string;
