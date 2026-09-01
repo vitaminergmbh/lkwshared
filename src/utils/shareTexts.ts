@@ -58,6 +58,10 @@ interface Bausteine {
   routeOeffnen: string;
   /** Ueberschrift der Fahrzeugmasse vor dem Link. */
   fahrzeugMasse: string;
+  /** "4,00 m hoch" — das Wort hinter dem Mass. */
+  hoch: string;
+  breit: string;
+  lang: string;
 }
 
 const TEXTE: Record<DriverLanguage, Bausteine> = {
@@ -74,6 +78,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     fahrzeit: 'Fahrzeit', lenkzeit: 'LKW-Lenkzeit', gesamt: 'Gesamt',
     stop: 'Stop', min: 'Min.', std: 'h', stdMin: 'min', uhr: ' Uhr',
     routeOeffnen: 'Route in HERE WeGo öffnen', fahrzeugMasse: 'Fahrzeugmaße',
+    hoch: 'hoch', breit: 'breit', lang: 'lang',
   },
   uk: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водій',
@@ -88,6 +93,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     fahrzeit: 'Час у дорозі', lenkzeit: 'Час керування вантажівкою', gesamt: 'Разом',
     stop: 'Зупинка', min: 'хв', std: 'год', stdMin: 'хв', uhr: '',
     routeOeffnen: 'Відкрити маршрут у HERE WeGo', fahrzeugMasse: 'Габарити транспорту',
+    hoch: 'заввишки', breit: 'завширшки', lang: 'завдовжки',
   },
   ru: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водитель',
@@ -102,6 +108,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     fahrzeit: 'Время в пути', lenkzeit: 'Время управления грузовиком', gesamt: 'Всего',
     stop: 'Остановка', min: 'мин', std: 'ч', stdMin: 'мин', uhr: '',
     routeOeffnen: 'Открыть маршрут в HERE WeGo', fahrzeugMasse: 'Габариты транспорта',
+    hoch: 'высота', breit: 'ширина', lang: 'длина',
   },
   pl: {
     tour: 'Trasa', datum: 'Data', fahrer: 'Kierowca',
@@ -116,6 +123,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     fahrzeit: 'Czas jazdy', lenkzeit: 'Czas prowadzenia ciężarówki', gesamt: 'Razem',
     stop: 'Przystanek', min: 'min', std: 'godz', stdMin: 'min', uhr: '',
     routeOeffnen: 'Otwórz trasę w HERE WeGo', fahrzeugMasse: 'Wymiary pojazdu',
+    hoch: 'wysokość', breit: 'szerokość', lang: 'długość',
   },
   en: {
     tour: 'Tour', datum: 'Date', fahrer: 'Driver',
@@ -130,6 +138,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     fahrzeit: 'Drive time', lenkzeit: 'Truck driving time', gesamt: 'Total',
     stop: 'Stop', min: 'min', std: 'h', stdMin: 'min', uhr: '',
     routeOeffnen: 'Open route in HERE WeGo', fahrzeugMasse: 'Vehicle dimensions',
+    hoch: 'high', breit: 'wide', lang: 'long',
   },
 };
 

@@ -27,6 +27,8 @@
  * tcr (Tunnelkategorie).
  */
 
+import { shareTexts } from './shareTexts';
+
 const BASIS = 'https://share.here.com/r/';
 
 /**
@@ -173,9 +175,17 @@ export function buildHereRouteUrl(
  * Steht neben dem Link, weil der Fahrer die Werte auch dann sehen soll, wenn
  * er die Route nicht ueber den Link oeffnet — etwa weil er das Profil in HERE
  * schon eingerichtet hat und nur gegenpruefen will.
+ *
+ * In der Sprache des Fahrers: "hoch", "breit" und "lang" standen anfangs fest
+ * auf Deutsch und blieben deshalb mitten in einer russischen Nachricht stehen.
+ * Einheiten (t, m) bleiben, die sind ueberall dieselben.
  */
-export function formatVehicleDimensions(v: HereVehicle | null | undefined): string | null {
+export function formatVehicleDimensions(
+  v: HereVehicle | null | undefined,
+  lang?: string | null,
+): string | null {
   if (!v) return null;
+  const T = shareTexts(lang);
   const teile: string[] = [];
   const meter = (cm: number) => (cm / 100).toFixed(2).replace('.', ',');
 
@@ -186,9 +196,9 @@ export function formatVehicleDimensions(v: HereVehicle | null | undefined): stri
     const tonnen = Number((v.gross_weight_kg / 1000).toFixed(2));
     teile.push(`${String(tonnen).replace('.', ',')} t`);
   }
-  if (v.height_cm) teile.push(`${meter(v.height_cm)} m hoch`);
-  if (v.width_cm) teile.push(`${meter(v.width_cm)} m breit`);
-  if (v.length_cm) teile.push(`${meter(v.length_cm)} m lang`);
+  if (v.height_cm) teile.push(`${meter(v.height_cm)} m ${T.hoch}`);
+  if (v.width_cm) teile.push(`${meter(v.width_cm)} m ${T.breit}`);
+  if (v.length_cm) teile.push(`${meter(v.length_cm)} m ${T.lang}`);
 
   return teile.length > 0 ? teile.join(' · ') : null;
 }

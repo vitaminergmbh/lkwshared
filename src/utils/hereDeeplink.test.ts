@@ -176,3 +176,16 @@ test('Ohne LKW-Modus bleiben auch Achsen und Bauart weg', () => {
   assert.equal(url!.includes('axc'), false);
   assert.equal(url!.includes('trt'), false);
 });
+
+test('Die Masse stehen in der Sprache des Fahrers', () => {
+  // Stand anfangs fest auf Deutsch und blieb deshalb mitten in einer
+  // russischen Nachricht stehen: "40 t · 4,00 m hoch · 2,55 m breit".
+  assert.equal(formatVehicleDimensions(ACTROS, 'ru'), '40 t · 4,00 m высота · 2,55 m ширина · 16,50 m длина');
+  assert.equal(formatVehicleDimensions(ACTROS, 'pl'), '40 t · 4,00 m wysokość · 2,55 m szerokość · 16,50 m długość');
+  assert.equal(formatVehicleDimensions(ACTROS, 'en'), '40 t · 4,00 m high · 2,55 m wide · 16,50 m long');
+});
+
+test('Ohne Sprache bleibt es deutsch', () => {
+  assert.equal(formatVehicleDimensions(ACTROS), '40 t · 4,00 m hoch · 2,55 m breit · 16,50 m lang');
+  assert.equal(formatVehicleDimensions(ACTROS, 'kli'), '40 t · 4,00 m hoch · 2,55 m breit · 16,50 m lang');
+});
