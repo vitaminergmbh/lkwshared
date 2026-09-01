@@ -45,6 +45,19 @@ export interface HereVehicle {
   height_cm?: number | null;
   width_cm?: number | null;
   length_cm?: number | null;
+  /**
+   * Achszahl.
+   *
+   * HERE WeGo warnt beim Oeffnen des Links: "Nicht angegebene Werte
+   * ueberschreiben alte Einstellungen". Ohne diesen Wert setzt die App die
+   * Achsen auf ihren Standard 2 — beim Sattelzug mit fuenf Achsen ist das
+   * falsch und aendert Maut wie Streckenfreigaben.
+   *
+   * `vax` ist aus der Parameterliste abgeleitet und von HERE bislang nur
+   * insofern bestaetigt, als die Weiterleitung ihn durchreicht. Ob die App ihn
+   * auswertet, zeigt die Zeile "Achsen" im Bestaetigungsdialog.
+   */
+  axle_count?: number | null;
 }
 
 export interface HereRouteOptions {
@@ -90,6 +103,7 @@ function masse(v: HereVehicle | null | undefined): Record<string, number> {
   setze('vdh', v.height_cm);
   setze('vdl', v.length_cm);
   setze('vdw', v.width_cm);
+  setze('vax', v.axle_count);
   return raus;
 }
 
