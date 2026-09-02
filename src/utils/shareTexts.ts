@@ -82,6 +82,8 @@ interface Bausteine {
   nichtAbrufbar: string;
   /** "Plan 20:14" — die geplante Zeit neben der erwarteten. */
   plan: string;
+  /** Knopf, der die Route in HERE oeffnet. */
+  route: string;
 }
 
 const TEXTE: Record<DriverLanguage, Bausteine> = {
@@ -105,7 +107,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     standzeit: 'Standzeit', aufladen: 'Aufladen', abladen: 'Abladen',
     tourBeendet: 'Tour beendet', stand: 'Stand',
     linkAbgelaufen: 'Dieser Link ist abgelaufen', linkUngueltig: 'Link ungültig',
-    nichtAbrufbar: 'Daten gerade nicht abrufbar', plan: 'Plan',
+    nichtAbrufbar: 'Daten gerade nicht abrufbar', plan: 'Plan', route: 'Route',
   },
   uk: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водій',
@@ -127,7 +129,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     standzeit: 'Час на місці', aufladen: 'Завантажити', abladen: 'Розвантажити',
     tourBeendet: 'Маршрут завершено', stand: 'Станом на',
     linkAbgelaufen: 'Це посилання застаріло', linkUngueltig: 'Недійсне посилання',
-    nichtAbrufbar: 'Дані зараз недоступні', plan: 'план',
+    nichtAbrufbar: 'Дані зараз недоступні', plan: 'план', route: 'Маршрут',
   },
   ru: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водитель',
@@ -149,7 +151,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     standzeit: 'Время на месте', aufladen: 'Загрузить', abladen: 'Выгрузить',
     tourBeendet: 'Маршрут завершён', stand: 'По состоянию на',
     linkAbgelaufen: 'Эта ссылка устарела', linkUngueltig: 'Недействительная ссылка',
-    nichtAbrufbar: 'Данные сейчас недоступны', plan: 'план',
+    nichtAbrufbar: 'Данные сейчас недоступны', plan: 'план', route: 'Маршрут',
   },
   pl: {
     tour: 'Trasa', datum: 'Data', fahrer: 'Kierowca',
@@ -171,7 +173,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     standzeit: 'Czas postoju', aufladen: 'Załadunek', abladen: 'Rozładunek',
     tourBeendet: 'Trasa zakończona', stand: 'Stan na',
     linkAbgelaufen: 'Ten link wygasł', linkUngueltig: 'Nieprawidłowy link',
-    nichtAbrufbar: 'Dane chwilowo niedostępne', plan: 'plan',
+    nichtAbrufbar: 'Dane chwilowo niedostępne', plan: 'plan', route: 'Trasa',
   },
   en: {
     tour: 'Tour', datum: 'Date', fahrer: 'Driver',
@@ -193,7 +195,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     standzeit: 'Time on site', aufladen: 'Load', abladen: 'Unload',
     tourBeendet: 'Tour finished', stand: 'As of',
     linkAbgelaufen: 'This link has expired', linkUngueltig: 'Invalid link',
-    nichtAbrufbar: 'Data currently unavailable', plan: 'plan',
+    nichtAbrufbar: 'Data currently unavailable', plan: 'plan', route: 'Route',
   },
 };
 
