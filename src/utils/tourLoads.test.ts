@@ -192,3 +192,27 @@ test('Leere Tour ergibt keine Abschnitte', () => {
   assert.deepEqual(splitByTruck([], 'a'), []);
   assert.deepEqual(splitByTruck([s()], 'a'), []);
 });
+
+import { isRideAlongAt } from './tourLoads';
+
+test('Mitfahrt gilt ab dem Wechselstop, bis ein Wechsel ohne Mitfahrt kommt', () => {
+  const stops = [
+    { truck_id: null },
+    { truck_id: 'kollege', ride_along: true },
+    { truck_id: null },
+    { truck_id: 'eigener', ride_along: false },
+    { truck_id: null },
+  ];
+  // Der Wechsel an Stop 1 gilt fuer die Fahrt DANACH — an Stop 1 selbst
+  // faehrt der Fahrer noch selbst hin.
+  assert.equal(isRideAlongAt(stops, 0), false);
+  assert.equal(isRideAlongAt(stops, 1), false);
+  assert.equal(isRideAlongAt(stops, 2), true);
+  assert.equal(isRideAlongAt(stops, 3), true);
+  assert.equal(isRideAlongAt(stops, 4), false);
+  assert.equal(isRideAlongAt(stops), false);
+});
+
+test('Ohne Wechsel ist niemand Mitfahrer', () => {
+  assert.equal(isRideAlongAt([{ truck_id: null }, { truck_id: null }], 2), false);
+});

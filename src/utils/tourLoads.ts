@@ -148,6 +148,30 @@ export function activeTruckIdAt(
   return aktiv;
 }
 
+/**
+ * Sitzt der Fahrer bei `index` nur bei?
+ *
+ * Ein Fahrzeugwechsel am Stop kann eine Mitfahrt sein: der Fahrer steigt zum
+ * Kollegen in den Wagen, und der Wagen gehoert ab da der Tour des Kollegen.
+ * Fuer den Fahrer selbst aendert das nichts — er sitzt in diesem Wagen, und
+ * activeTruckIdAt sagt weiter, in welchem. Fuer alles, was fragt "welche
+ * Tour faehrt dieser Wagen?", ist die Mitfahrer-Tour aber die falsche.
+ *
+ * Massgeblich ist der letzte Wechsel VOR `index`, derselbe, der auch das
+ * aktive Fahrzeug bestimmt.
+ */
+export function isRideAlongAt(
+  stops: Array<{ truck_id?: string | null; ride_along?: boolean | null }>,
+  index: number = Number.MAX_SAFE_INTEGER,
+): boolean {
+  let mitfahrt = false;
+  for (let i = 0; i < Math.min(index, stops.length); i++) {
+    const s = stops[i];
+    if (s?.truck_id) mitfahrt = !!s.ride_along;
+  }
+  return mitfahrt;
+}
+
 /** Ein Stueck Tour, das mit demselben Fahrzeug gefahren wird. */
 export interface TruckLeg<T> {
   truckId: string | null;

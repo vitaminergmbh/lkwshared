@@ -328,6 +328,11 @@ export interface TourStop {
   time_window_ok: boolean;
   break_needed_before: boolean;
   truck_id: string | null;                // LKW-Wechsel ab diesem Stop
+  /**
+   * Der Wechsel ist eine Mitfahrt: der Fahrer sitzt ab hier beim Kollegen
+   * im Wagen (truck_id), der Wagen gehoert der Tour des Kollegen.
+   */
+  ride_along?: boolean;
   checked: boolean;                       // Stop wurde abgehakt (live tracking)
   notes?: string | null;                  // Lade-/Entladeanweisungen für Fahrer
   load_note?: string | null;              // Beladungs-Info für Fahrer (Emoji + Freitext)
