@@ -219,3 +219,22 @@ test('Ohne brauchbare Koordinate gibt es keinen Stop-Link', () => {
   assert.equal(buildHereStopUrl({ latitude: 0, longitude: 0 }), null);
   assert.equal(buildHereStopUrl({ latitude: 95, longitude: 12 }), null);
 });
+
+test('Ein Durchfahrtspunkt steht ohne Titel mit Typ p im Pfad', () => {
+  const url = buildHereRouteUrl([
+    KUNDE,
+    { latitude: 51.5, longitude: 12.2, passThrough: true },
+    { latitude: 51.32469, longitude: 12.15517, label: 'LEUNA' },
+  ], null, {});
+  assert.equal(url, 'https://share.here.com/r/51.83929,12.18755,Nicole%20Sopora/51.5,12.2,,p/51.32469,12.15517,LEUNA');
+});
+
+test('Ein Durchfahrtspunkt verliert seinen Titel, falls einer gesetzt ist', () => {
+  const url = buildHereRouteUrl([
+    KUNDE,
+    { latitude: 51.5, longitude: 12.2, label: 'A9', passThrough: true },
+    { latitude: 51.32469, longitude: 12.15517 },
+  ], null, {});
+  assert.match(url!, /\/51\.5,12\.2,,p\//);
+  assert.doesNotMatch(url!, /A9/);
+});

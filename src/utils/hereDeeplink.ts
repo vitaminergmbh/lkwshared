@@ -50,6 +50,13 @@ export interface HereWaypoint {
   longitude: number | null | undefined;
   /** Was in HERE am Punkt stehen soll, z.B. der Standortname. */
   label?: string | null;
+  /**
+   * Durchfahrtspunkt statt Halt: HERE fuehrt die Route hindurch, ohne
+   * dort anzukommen. Damit folgt die App der Route des Planers, statt
+   * sich beim Oeffnen eine eigene zu suchen. Ohne Titel — der Fahrer
+   * soll den Punkt nicht als Ziel sehen.
+   */
+  passThrough?: boolean;
 }
 
 /** Bauart laut HERE: Solo-LKW oder Sattelzugmaschine. */
@@ -131,10 +138,16 @@ function bauart(v: HereVehicle | null | undefined): HereTruckType | null {
   return t === 'straight' || t === 'tractor' ? t : null;
 }
 
-/** Ein Wegpunkt als Pfadstueck: "51.32469,12.15517,LEUNA". */
+/**
+ * Ein Wegpunkt als Pfadstueck: "51.32469,12.15517,LEUNA".
+ *
+ * Durchfahrtspunkte tragen statt des Titels den Typ: "51.5,12.2,,p" —
+ * das leere Feld ist der Titel, p steht fuer pass-through.
+ */
 function wegpunkt(w: HereWaypoint): string {
   const la = w.latitude!.toFixed(KOMMASTELLEN);
   const lo = w.longitude!.toFixed(KOMMASTELLEN);
+  if (w.passThrough) return `${la},${lo},,p`;
   const t = titel(w.label);
   return t ? `${la},${lo},${t}` : `${la},${lo}`;
 }

@@ -274,6 +274,12 @@ export interface Tour {
   live_truck_id: string | null;
   /** Schluessel des Fahrerlinks (/fahrer/<token>); entsteht in der Datenbank. */
   driver_token?: string | null;
+  /**
+   * HERE-Link mit Durchfahrtspunkten aus der geplanten Route (Vorgabe).
+   * Abschalten, wenn eine Sperrung bekannt ist — dann sucht HERE den Weg
+   * selbst.
+   */
+  here_via_points?: boolean | null;
   date: string | null;
   start_time: string | null;
   status: TourStatus;
