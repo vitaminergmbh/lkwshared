@@ -210,3 +210,31 @@ export function splitByTruck<T extends { truck_id?: string | null }>(
 
   return abschnitte.filter((a) => a.stops.length >= 2);
 }
+
+/**
+ * Ist der Stop eine reine Pause — oder ein Ort, an dem der Fahrer nebenbei
+ * Pause macht?
+ *
+ * "Pause einfuegen" legt einen Stop ohne Standort an, mit den Koordinaten
+ * des Stops davor und counts_as_break. Ein per Adresssuche eingefuegter
+ * Kunde hat ebenfalls keinen Standortsatz und kann ebenfalls als Pause
+ * zaehlen (60 Minuten Be- und Entladung, in denen der Fahrer seine Pause
+ * nimmt) — ist aber ein Ort mit eigener Anfahrt. Der Unterschied ist die
+ * Fahrt: zur reinen Pause faehrt niemand, sie liegt dort, wo man gerade
+ * steht.
+ */
+export function isPureBreakStop(stop: {
+  location_id?: string | null;
+  counts_as_break?: boolean | null;
+  custom_name?: string | null;
+  distance_from_prev?: number | null;
+  drive_time_from_prev?: number | null;
+}): boolean {
+  if (!stop.counts_as_break || stop.location_id) return false;
+  // Vor dem ersten Berechnen fehlt die Distanz noch; dann entscheidet der
+  // Name, den "Pause einfuegen" vergibt.
+  if (stop.distance_from_prev == null && stop.drive_time_from_prev == null) {
+    return /^pause\b/i.test(stop.custom_name ?? '');
+  }
+  return (stop.distance_from_prev ?? 0) < 0.1 && (stop.drive_time_from_prev ?? 0) < 1;
+}

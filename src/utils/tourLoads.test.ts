@@ -216,3 +216,22 @@ test('Mitfahrt gilt ab dem Wechselstop, bis ein Wechsel ohne Mitfahrt kommt', ()
 test('Ohne Wechsel ist niemand Mitfahrer', () => {
   assert.equal(isRideAlongAt([{ truck_id: null }, { truck_id: null }], 2), false);
 });
+
+import { isPureBreakStop } from './tourLoads';
+
+test('Eine eingefuegte Pause ist eine reine Pause', () => {
+  assert.equal(isPureBreakStop({ location_id: null, counts_as_break: true, custom_name: 'Pause 45 Min.', distance_from_prev: 0, drive_time_from_prev: 0 }), true);
+  // Noch nicht berechnet: der Name entscheidet.
+  assert.equal(isPureBreakStop({ location_id: null, counts_as_break: true, custom_name: 'Pause 30 Min.' }), true);
+});
+
+test('Ein Kunde per Adresssuche mit Pause bleibt ein Ort', () => {
+  // 60 Minuten Be- und Entladung, Pause nebenbei — aber 84,6 km Anfahrt.
+  assert.equal(isPureBreakStop({ location_id: null, counts_as_break: true, custom_name: 'Agrargut Malkwitz KG', distance_from_prev: 84.6, drive_time_from_prev: 76 }), false);
+  assert.equal(isPureBreakStop({ location_id: null, counts_as_break: true, custom_name: 'Agrargut Malkwitz KG' }), false);
+});
+
+test('Ohne counts_as_break oder mit Standort nie eine reine Pause', () => {
+  assert.equal(isPureBreakStop({ location_id: null, counts_as_break: false, custom_name: 'Pause 45 Min.', distance_from_prev: 0 }), false);
+  assert.equal(isPureBreakStop({ location_id: 'x', counts_as_break: true, custom_name: null, distance_from_prev: 0 }), false);
+});

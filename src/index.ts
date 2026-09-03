@@ -173,3 +173,4 @@ export type { DocumentPatch } from './api/vehicleDocuments';
 export type { ServiceLogPatch } from './api/serviceLog';
 export type { TruckLeg } from './utils/tourLoads';
 export { isRideAlongAt } from './utils/tourLoads';
+export { isPureBreakStop } from './utils/tourLoads';
