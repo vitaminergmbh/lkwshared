@@ -136,6 +136,14 @@ interface Bausteine {
   alleAnzeigen: (n: number) => string;
   wenigerAnzeigen: string;
 
+  // --- Kurznachricht (WhatsApp): nur Eckdaten und der Link ---
+  /** "6 Stops" */
+  stopsAnzahl: (n: number) => string;
+  /** Zeile vor dem Link zur Fahrerseite. */
+  kurzLink: string;
+  /** Bitte, die Seite zu oeffnen und die Tour zu bestaetigen. */
+  kurzBestaetigen: string;
+
   // --- Aenderungen seit der Freigabe (formatAenderung) ---
   aDatum: string;
   aStartzeit: string;
@@ -196,6 +204,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBestaetigen: 'Tour bestätigen',
     tourPruefen: 'Bitte die Tour prüfen und bestätigen.',
     alleAnzeigen: (n) => `Alle ${n} anzeigen`, wenigerAnzeigen: 'Weniger anzeigen',
+    stopsAnzahl: (n) => `${n} Stops`, kurzLink: 'Deine Tour, immer aktuell:', kurzBestaetigen: 'Bitte öffnen und die Tour bestätigen.',
     aDatum: 'Datum',
     aStartzeit: 'Startzeit',
     aStartfahrzeug: 'Startfahrzeug',
@@ -252,6 +261,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBestaetigen: 'Підтвердити тур',
     tourPruefen: 'Будь ласка, перевірте тур і підтвердіть.',
     alleAnzeigen: (n) => `Показати всі (${n})`, wenigerAnzeigen: 'Менше',
+    stopsAnzahl: (n) => `${n} зупинок`, kurzLink: 'Твій тур, завжди актуальний:', kurzBestaetigen: 'Відкрий і підтверди тур.',
     aDatum: 'Дата',
     aStartzeit: 'Час старту',
     aStartfahrzeug: 'Стартовий автомобіль',
@@ -308,6 +318,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBestaetigen: 'Подтвердить тур',
     tourPruefen: 'Пожалуйста, проверьте тур и подтвердите.',
     alleAnzeigen: (n) => `Показать все (${n})`, wenigerAnzeigen: 'Меньше',
+    stopsAnzahl: (n) => `${n} остановок`, kurzLink: 'Твой тур, всегда актуальный:', kurzBestaetigen: 'Открой и подтверди тур.',
     aDatum: 'Дата',
     aStartzeit: 'Время старта',
     aStartfahrzeug: 'Стартовый автомобиль',
@@ -364,6 +375,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBestaetigen: 'Potwierdź trasę',
     tourPruefen: 'Proszę sprawdzić trasę i potwierdzić.',
     alleAnzeigen: (n) => `Pokaż wszystkie (${n})`, wenigerAnzeigen: 'Mniej',
+    stopsAnzahl: (n) => `${n} przystanków`, kurzLink: 'Twoja trasa, zawsze aktualna:', kurzBestaetigen: 'Otwórz i potwierdź trasę.',
     aDatum: 'Data',
     aStartzeit: 'Godzina startu',
     aStartfahrzeug: 'Pojazd startowy',
@@ -420,6 +432,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBestaetigen: 'Confirm tour',
     tourPruefen: 'Please check the tour and confirm.',
     alleAnzeigen: (n) => `Show all (${n})`, wenigerAnzeigen: 'Show less',
+    stopsAnzahl: (n) => `${n} stops`, kurzLink: 'Your tour, always up to date:', kurzBestaetigen: 'Open it and confirm the tour.',
     aDatum: 'Date',
     aStartzeit: 'Start time',
     aStartfahrzeug: 'Start vehicle',
