@@ -172,6 +172,17 @@ export async function createNotice(input: {
   return data as DriverNotice;
 }
 
+/**
+ * Bestaetigung zuruecknehmen: der Hinweis steht wieder offen auf der
+ * Fahrerseite, als waere er nie bestaetigt worden — etwa nach einem Test
+ * durch die Disposition selbst.
+ */
+export async function resetNoticeAck(id: string, tourId: string): Promise<void> {
+  const { error } = await getSupabase().from('driver_notices').update({ acknowledged_at: null }).eq('id', id);
+  if (error) throw new Error(error.message);
+  notifyTourChanged(tourId).catch(() => {});
+}
+
 export async function deleteNotice(id: string, tourId?: string): Promise<void> {
   const { error } = await getSupabase().from('driver_notices').delete().eq('id', id);
   if (error) throw new Error(error.message);
