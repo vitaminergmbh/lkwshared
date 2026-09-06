@@ -126,6 +126,32 @@ interface Bausteine {
   kameraFehlt: string;
   /** "3 hochgeladen" in der Kamera-Ansicht. */
   fotosHochgeladen: (n: number) => string;
+
+  // --- Tourbestaetigung ---
+  /** Ueberschrift und Knopf: der Fahrer bestaetigt die ganze Tour. */
+  tourBestaetigen: string;
+  /** Standardtext des Hinweises dazu. */
+  tourPruefen: string;
+
+  // --- Aenderungen seit der Freigabe (formatAenderung) ---
+  aDatum: string;
+  aStartzeit: string;
+  aStartfahrzeug: string;
+  aStartfahrzeugGeaendert: string;
+  aFahrerGeaendert: string;
+  aStopEntfernt: string;
+  aNeuerStop: string;
+  aPosition: string;
+  aReihenfolge: string;
+  aStandortGetauscht: string;
+  aFahrzeugwechsel: string;
+  /** "Fahrzeugwechsel AUF Actros" */
+  aFahrzeugwechselAuf: string;
+  aFahrzeugwechselEntfernt: string;
+  aNurMitfahrt: string;
+  aMitfahrtAufgehoben: string;
+  aLadehinweis: string;
+  aPaletten: string;
 }
 
 const TEXTE: Record<DriverLanguage, Bausteine> = {
@@ -164,6 +190,25 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenGesperrt: 'Benachrichtigungen im Browser gesperrt',
     fotoAufnehmen: 'Foto aufnehmen', dateiWaehlen: 'Datei wählen', fertig: 'Fertig',
     kameraFehlt: 'Kamera nicht verfügbar', fotosHochgeladen: (n) => `${n} hochgeladen`,
+    tourBestaetigen: 'Tour bestätigen',
+    tourPruefen: 'Bitte die Tour prüfen und bestätigen.',
+    aDatum: 'Datum',
+    aStartzeit: 'Startzeit',
+    aStartfahrzeug: 'Startfahrzeug',
+    aStartfahrzeugGeaendert: 'Startfahrzeug geändert',
+    aFahrerGeaendert: 'Fahrer geändert',
+    aStopEntfernt: 'Stop entfernt',
+    aNeuerStop: 'Neuer Stop',
+    aPosition: 'Position',
+    aReihenfolge: 'Reihenfolge geändert',
+    aStandortGetauscht: 'Standort getauscht',
+    aFahrzeugwechsel: 'Fahrzeugwechsel',
+    aFahrzeugwechselAuf: 'auf',
+    aFahrzeugwechselEntfernt: 'Fahrzeugwechsel entfernt',
+    aNurMitfahrt: 'nur Mitfahrt',
+    aMitfahrtAufgehoben: 'Mitfahrt aufgehoben',
+    aLadehinweis: 'Ladehinweis geändert',
+    aPaletten: 'Paletten geändert',
   },
   uk: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водій',
@@ -200,6 +245,25 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenGesperrt: 'Сповіщення заблоковані в браузері',
     fotoAufnehmen: 'Зробити фото', dateiWaehlen: 'Вибрати файл', fertig: 'Готово',
     kameraFehlt: 'Камера недоступна', fotosHochgeladen: (n) => `${n} завантажено`,
+    tourBestaetigen: 'Підтвердити тур',
+    tourPruefen: 'Будь ласка, перевірте тур і підтвердіть.',
+    aDatum: 'Дата',
+    aStartzeit: 'Час старту',
+    aStartfahrzeug: 'Стартовий автомобіль',
+    aStartfahrzeugGeaendert: 'Стартовий автомобіль змінено',
+    aFahrerGeaendert: 'Водія змінено',
+    aStopEntfernt: 'Зупинку видалено',
+    aNeuerStop: 'Нова зупинка',
+    aPosition: 'Позиція',
+    aReihenfolge: 'Порядок змінено',
+    aStandortGetauscht: 'Місце змінено',
+    aFahrzeugwechsel: 'Зміна автомобіля',
+    aFahrzeugwechselAuf: 'на',
+    aFahrzeugwechselEntfernt: 'Зміну автомобіля скасовано',
+    aNurMitfahrt: 'лише пасажиром',
+    aMitfahrtAufgehoben: 'пасажирство скасовано',
+    aLadehinweis: 'Вказівку щодо вантажу змінено',
+    aPaletten: 'Палети змінено',
   },
   ru: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водитель',
@@ -236,6 +300,25 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenGesperrt: 'Уведомления заблокированы в браузере',
     fotoAufnehmen: 'Сделать фото', dateiWaehlen: 'Выбрать файл', fertig: 'Готово',
     kameraFehlt: 'Камера недоступна', fotosHochgeladen: (n) => `${n} загружено`,
+    tourBestaetigen: 'Подтвердить тур',
+    tourPruefen: 'Пожалуйста, проверьте тур и подтвердите.',
+    aDatum: 'Дата',
+    aStartzeit: 'Время старта',
+    aStartfahrzeug: 'Стартовый автомобиль',
+    aStartfahrzeugGeaendert: 'Стартовый автомобиль изменён',
+    aFahrerGeaendert: 'Водитель изменён',
+    aStopEntfernt: 'Остановка удалена',
+    aNeuerStop: 'Новая остановка',
+    aPosition: 'Позиция',
+    aReihenfolge: 'Порядок изменён',
+    aStandortGetauscht: 'Место изменено',
+    aFahrzeugwechsel: 'Смена автомобиля',
+    aFahrzeugwechselAuf: 'на',
+    aFahrzeugwechselEntfernt: 'Смена автомобиля отменена',
+    aNurMitfahrt: 'только пассажиром',
+    aMitfahrtAufgehoben: 'пассажирство отменено',
+    aLadehinweis: 'Указание по грузу изменено',
+    aPaletten: 'Паллеты изменены',
   },
   pl: {
     tour: 'Trasa', datum: 'Data', fahrer: 'Kierowca',
@@ -272,6 +355,25 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenGesperrt: 'Powiadomienia zablokowane w przeglądarce',
     fotoAufnehmen: 'Zrób zdjęcie', dateiWaehlen: 'Wybierz plik', fertig: 'Gotowe',
     kameraFehlt: 'Kamera niedostępna', fotosHochgeladen: (n) => `${n} przesłano`,
+    tourBestaetigen: 'Potwierdź trasę',
+    tourPruefen: 'Proszę sprawdzić trasę i potwierdzić.',
+    aDatum: 'Data',
+    aStartzeit: 'Godzina startu',
+    aStartfahrzeug: 'Pojazd startowy',
+    aStartfahrzeugGeaendert: 'Zmieniono pojazd startowy',
+    aFahrerGeaendert: 'Zmieniono kierowcę',
+    aStopEntfernt: 'Usunięto przystanek',
+    aNeuerStop: 'Nowy przystanek',
+    aPosition: 'Pozycja',
+    aReihenfolge: 'Zmieniono kolejność',
+    aStandortGetauscht: 'Zmieniono lokalizację',
+    aFahrzeugwechsel: 'Zmiana pojazdu',
+    aFahrzeugwechselAuf: 'na',
+    aFahrzeugwechselEntfernt: 'Zmiana pojazdu usunięta',
+    aNurMitfahrt: 'tylko jako pasażer',
+    aMitfahrtAufgehoben: 'pasażerstwo anulowane',
+    aLadehinweis: 'Zmieniono uwagę o ładunku',
+    aPaletten: 'Zmieniono palety',
   },
   en: {
     tour: 'Tour', datum: 'Date', fahrer: 'Driver',
@@ -308,6 +410,25 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenGesperrt: 'Notifications blocked in the browser',
     fotoAufnehmen: 'Take photo', dateiWaehlen: 'Choose file', fertig: 'Done',
     kameraFehlt: 'Camera not available', fotosHochgeladen: (n) => `${n} uploaded`,
+    tourBestaetigen: 'Confirm tour',
+    tourPruefen: 'Please check the tour and confirm.',
+    aDatum: 'Date',
+    aStartzeit: 'Start time',
+    aStartfahrzeug: 'Start vehicle',
+    aStartfahrzeugGeaendert: 'Start vehicle changed',
+    aFahrerGeaendert: 'Driver changed',
+    aStopEntfernt: 'Stop removed',
+    aNeuerStop: 'New stop',
+    aPosition: 'Position',
+    aReihenfolge: 'Order changed',
+    aStandortGetauscht: 'Location swapped',
+    aFahrzeugwechsel: 'Vehicle change',
+    aFahrzeugwechselAuf: 'to',
+    aFahrzeugwechselEntfernt: 'Vehicle change removed',
+    aNurMitfahrt: 'passenger only',
+    aMitfahrtAufgehoben: 'passenger status removed',
+    aLadehinweis: 'Loading note changed',
+    aPaletten: 'Pallets changed',
   },
 };
 

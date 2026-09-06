@@ -1,4 +1,5 @@
 import { getSupabase } from '../supabase';
+import type { AenderungsDetails } from '../utils/releaseDiff';
 
 /**
  * Fahrerseite, Rueckweg und Freigabe.
@@ -14,7 +15,7 @@ import { getSupabase } from '../supabase';
  * (fahrer-view, fahrer-upload); diese Funktionen hier sind fuer den Planer.
  */
 
-export type DriverNoticeKind = 'info' | 'documents' | 'change';
+export type DriverNoticeKind = 'info' | 'documents' | 'change' | 'tour';
 
 export interface DriverTourRelease {
   id: string;
@@ -38,6 +39,8 @@ export interface DriverNotice {
   acknowledged_at: string | null;
   push_sent_at: string | null;
   push_result: string | null;
+  /** Strukturierte Aenderungen fuer die Uebersetzung; null bei freiem Text. */
+  details: AenderungsDetails | null;
 }
 
 export interface DriverDocument {
@@ -157,10 +160,11 @@ export async function createNotice(input: {
   kind: DriverNoticeKind;
   text: string;
   release_id?: string | null;
+  details?: AenderungsDetails | null;
 }): Promise<DriverNotice> {
   const { data, error } = await getSupabase()
     .from('driver_notices')
-    .insert({ tour_id: input.tour_id, kind: input.kind, text: input.text, release_id: input.release_id ?? null })
+    .insert({ tour_id: input.tour_id, kind: input.kind, text: input.text, release_id: input.release_id ?? null, details: input.details ?? null })
     .select()
     .single();
   if (error) throw new Error(error.message);
