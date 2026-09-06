@@ -23,7 +23,7 @@ test('Jede angebotene Sprache hat vollstaendige Bausteine', () => {
 
 test('Ausser im Deutschen ist jeder Baustein tatsaechlich uebersetzt', () => {
   // "Tour", "min", "Route", "Plan" sind in mehreren Sprachen gleich — die sind ausgenommen.
-  const gleichErlaubt = new Set(['tour', 'stop', 'min', 'std', 'stdMin', 'uhr', 'route', 'plan', 'aPosition']);
+  const gleichErlaubt = new Set(['tour', 'stop', 'min', 'std', 'stdMin', 'uhr', 'route', 'plan', 'aPosition', 'start']);
   const deutsch = shareTexts('de');
 
   for (const { code } of DRIVER_LANGUAGES) {
