@@ -54,6 +54,37 @@ export interface DriverDocument {
 
 const BUCKET = 'driver-uploads';
 
+// ---------------------------------------------------------------- Funk
+
+/**
+ * Kanalname je Tour. Broadcast, nicht Tabellen-Ereignisse: die Fahrerseite
+ * hat keinen Datenbankzugriff (und soll keinen bekommen), einen offenen
+ * Funkkanal darf sie aber hoeren. Der Planer sendet nach jeder Freigabe
+ * und jedem Hinweis "changed"; die Seite holt sich dann sofort den Stand,
+ * statt bis zu 30 Sekunden auf den naechsten Abruf zu warten.
+ */
+const kanalName = (tourId: string) => `tour-${tourId}`;
+
+/** Der Fahrerseite sagen: hol dir den neuen Stand. Feuer und vergessen. */
+export async function notifyTourChanged(tourId: string): Promise<void> {
+  const sb = getSupabase();
+  const kanal = sb.channel(kanalName(tourId));
+  try {
+    await kanal.send({ type: 'broadcast', event: 'changed', payload: { at: new Date().toISOString() } });
+  } finally {
+    void sb.removeChannel(kanal);
+  }
+}
+
+/** Auf der Fahrerseite: bei jedem "changed" nachladen. Gibt die Abmeldefunktion zurueck. */
+export function subscribeTourChanged(tourId: string, onChanged: () => void): () => void {
+  const sb = getSupabase();
+  const kanal = sb.channel(kanalName(tourId))
+    .on('broadcast', { event: 'changed' }, () => onChanged())
+    .subscribe();
+  return () => { void sb.removeChannel(kanal); };
+}
+
 // ---------------------------------------------------------------- Freigabe
 
 /** Die juengste Freigabe der Tour, oder null, wenn nie freigegeben. */
@@ -92,6 +123,7 @@ export async function createRelease(
     .update({ driver_released_at: release.released_at })
     .eq('id', tourId);
   if (e2) throw new Error(e2.message);
+  notifyTourChanged(tourId).catch(() => {});
   return release;
 }
 
@@ -132,12 +164,14 @@ export async function createNotice(input: {
     .select()
     .single();
   if (error) throw new Error(error.message);
+  notifyTourChanged(input.tour_id).catch(() => {});
   return data as DriverNotice;
 }
 
-export async function deleteNotice(id: string): Promise<void> {
+export async function deleteNotice(id: string, tourId?: string): Promise<void> {
   const { error } = await getSupabase().from('driver_notices').delete().eq('id', id);
   if (error) throw new Error(error.message);
+  if (tourId) notifyTourChanged(tourId).catch(() => {});
 }
 
 /**
