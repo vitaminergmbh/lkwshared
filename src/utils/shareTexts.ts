@@ -132,6 +132,9 @@ interface Bausteine {
   tourBestaetigen: string;
   /** Standardtext des Hinweises dazu. */
   tourPruefen: string;
+  /** Verlauf der bestaetigten Hinweise aufklappen: "Alle 7 anzeigen". */
+  alleAnzeigen: (n: number) => string;
+  wenigerAnzeigen: string;
 
   // --- Aenderungen seit der Freigabe (formatAenderung) ---
   aDatum: string;
@@ -192,6 +195,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     kameraFehlt: 'Kamera nicht verfügbar', fotosHochgeladen: (n) => `${n} hochgeladen`,
     tourBestaetigen: 'Tour bestätigen',
     tourPruefen: 'Bitte die Tour prüfen und bestätigen.',
+    alleAnzeigen: (n) => `Alle ${n} anzeigen`, wenigerAnzeigen: 'Weniger anzeigen',
     aDatum: 'Datum',
     aStartzeit: 'Startzeit',
     aStartfahrzeug: 'Startfahrzeug',
@@ -247,6 +251,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     kameraFehlt: 'Камера недоступна', fotosHochgeladen: (n) => `${n} завантажено`,
     tourBestaetigen: 'Підтвердити тур',
     tourPruefen: 'Будь ласка, перевірте тур і підтвердіть.',
+    alleAnzeigen: (n) => `Показати всі (${n})`, wenigerAnzeigen: 'Менше',
     aDatum: 'Дата',
     aStartzeit: 'Час старту',
     aStartfahrzeug: 'Стартовий автомобіль',
@@ -302,6 +307,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     kameraFehlt: 'Камера недоступна', fotosHochgeladen: (n) => `${n} загружено`,
     tourBestaetigen: 'Подтвердить тур',
     tourPruefen: 'Пожалуйста, проверьте тур и подтвердите.',
+    alleAnzeigen: (n) => `Показать все (${n})`, wenigerAnzeigen: 'Меньше',
     aDatum: 'Дата',
     aStartzeit: 'Время старта',
     aStartfahrzeug: 'Стартовый автомобиль',
@@ -357,6 +363,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     kameraFehlt: 'Kamera niedostępna', fotosHochgeladen: (n) => `${n} przesłano`,
     tourBestaetigen: 'Potwierdź trasę',
     tourPruefen: 'Proszę sprawdzić trasę i potwierdzić.',
+    alleAnzeigen: (n) => `Pokaż wszystkie (${n})`, wenigerAnzeigen: 'Mniej',
     aDatum: 'Data',
     aStartzeit: 'Godzina startu',
     aStartfahrzeug: 'Pojazd startowy',
@@ -412,6 +419,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     kameraFehlt: 'Camera not available', fotosHochgeladen: (n) => `${n} uploaded`,
     tourBestaetigen: 'Confirm tour',
     tourPruefen: 'Please check the tour and confirm.',
+    alleAnzeigen: (n) => `Show all (${n})`, wenigerAnzeigen: 'Show less',
     aDatum: 'Date',
     aStartzeit: 'Start time',
     aStartfahrzeug: 'Start vehicle',
