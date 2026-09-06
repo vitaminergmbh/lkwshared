@@ -116,6 +116,16 @@ interface Bausteine {
   benachrichtigungenAktiv: string;
   /** Push vom Browser abgelehnt. */
   benachrichtigungenGesperrt: string;
+  /** Grosser Knopf: Kamera auf der Seite oeffnen. */
+  fotoAufnehmen: string;
+  /** Kleiner Knopf: Datei oder Galerie. */
+  dateiWaehlen: string;
+  /** Kamera schliessen. */
+  fertig: string;
+  /** Kamera geht nicht (kein Zugriff, kein Geraet). */
+  kameraFehlt: string;
+  /** "3 hochgeladen" in der Kamera-Ansicht. */
+  fotosHochgeladen: (n: number) => string;
 }
 
 const TEXTE: Record<DriverLanguage, Bausteine> = {
@@ -152,6 +162,8 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenAn: 'Benachrichtigungen einschalten',
     benachrichtigungenAktiv: 'Benachrichtigungen aktiv',
     benachrichtigungenGesperrt: 'Benachrichtigungen im Browser gesperrt',
+    fotoAufnehmen: 'Foto aufnehmen', dateiWaehlen: 'Datei wählen', fertig: 'Fertig',
+    kameraFehlt: 'Kamera nicht verfügbar', fotosHochgeladen: (n) => `${n} hochgeladen`,
   },
   uk: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водій',
@@ -186,6 +198,8 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenAn: 'Увімкнути сповіщення',
     benachrichtigungenAktiv: 'Сповіщення увімкнено',
     benachrichtigungenGesperrt: 'Сповіщення заблоковані в браузері',
+    fotoAufnehmen: 'Зробити фото', dateiWaehlen: 'Вибрати файл', fertig: 'Готово',
+    kameraFehlt: 'Камера недоступна', fotosHochgeladen: (n) => `${n} завантажено`,
   },
   ru: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водитель',
@@ -220,6 +234,8 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenAn: 'Включить уведомления',
     benachrichtigungenAktiv: 'Уведомления включены',
     benachrichtigungenGesperrt: 'Уведомления заблокированы в браузере',
+    fotoAufnehmen: 'Сделать фото', dateiWaehlen: 'Выбрать файл', fertig: 'Готово',
+    kameraFehlt: 'Камера недоступна', fotosHochgeladen: (n) => `${n} загружено`,
   },
   pl: {
     tour: 'Trasa', datum: 'Data', fahrer: 'Kierowca',
@@ -254,6 +270,8 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenAn: 'Włącz powiadomienia',
     benachrichtigungenAktiv: 'Powiadomienia włączone',
     benachrichtigungenGesperrt: 'Powiadomienia zablokowane w przeglądarce',
+    fotoAufnehmen: 'Zrób zdjęcie', dateiWaehlen: 'Wybierz plik', fertig: 'Gotowe',
+    kameraFehlt: 'Kamera niedostępna', fotosHochgeladen: (n) => `${n} przesłano`,
   },
   en: {
     tour: 'Tour', datum: 'Date', fahrer: 'Driver',
@@ -288,6 +306,8 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     benachrichtigungenAn: 'Enable notifications',
     benachrichtigungenAktiv: 'Notifications on',
     benachrichtigungenGesperrt: 'Notifications blocked in the browser',
+    fotoAufnehmen: 'Take photo', dateiWaehlen: 'Choose file', fertig: 'Done',
+    kameraFehlt: 'Camera not available', fotosHochgeladen: (n) => `${n} uploaded`,
   },
 };
 

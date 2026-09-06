@@ -196,6 +196,22 @@ export async function documentUrl(path: string, expiresInSeconds = 600): Promise
   return data.signedUrl;
 }
 
+/**
+ * Signierte Links fuer viele Dateien auf einmal (Vorschaubilder je Stop).
+ * Ein Aufruf statt einem je Datei; Pfad -> Link.
+ */
+export async function documentUrls(paths: string[], expiresInSeconds = 3600): Promise<Map<string, string>> {
+  const raus = new Map<string, string>();
+  const gefragt = [...new Set(paths)].filter(Boolean);
+  if (gefragt.length === 0) return raus;
+  const { data, error } = await getSupabase().storage.from(BUCKET).createSignedUrls(gefragt, expiresInSeconds);
+  if (error) throw new Error(error.message);
+  for (const z of data ?? []) {
+    if (z.path && z.signedUrl) raus.set(z.path, z.signedUrl);
+  }
+  return raus;
+}
+
 export async function deleteDocument(doc: DriverDocument): Promise<void> {
   const { error: e1 } = await getSupabase().storage.from(BUCKET).remove([doc.path]);
   if (e1) throw new Error(e1.message);
