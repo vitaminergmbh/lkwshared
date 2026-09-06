@@ -282,6 +282,8 @@ export interface Tour {
   here_via_points?: boolean | null;
   /** Letzter Abruf der Fahrerseite; juenger als eine Minute heisst: sie ist gerade offen. */
   driver_seen_at?: string | null;
+  /** Letzte Freigabe fuer die Fahrerseite; null = der Fahrer sieht die Arbeitsdaten. */
+  driver_released_at?: string | null;
   date: string | null;
   start_time: string | null;
   status: TourStatus;

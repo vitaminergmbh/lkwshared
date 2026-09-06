@@ -52,6 +52,10 @@ export * as VehicleDocumentAPI from './api/vehicleDocuments';
 export * as ServiceLogAPI from './api/serviceLog';
 export * as OdometerAPI from './api/odometer';
 export * as ShortLinkAPI from './api/shortLinks';
+export * as DriverCommsAPI from './api/driverComms';
+export type { DriverTourRelease, DriverNotice, DriverNoticeKind, DriverDocument } from './api/driverComms';
+export { vergleicheFreigabe } from './utils/releaseDiff';
+export type { FreigabeStand, FreigabeStop, FreigabeTour, FreigabeVergleichOptionen } from './utils/releaseDiff';
 
 // === Paletten-Kapazitaet ===
 export { computeTourLoad } from './utils/palletLoad';

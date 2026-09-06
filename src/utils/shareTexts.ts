@@ -90,6 +90,32 @@ interface Bausteine {
   laden: string;
   /** Beschriftung der Wartezeit am Stop. */
   warten: string;
+
+  // --- Hinweise, Push, Dokumente ---
+  /** Ueberschrift eines Hinweises der Disposition. */
+  hinweis: string;
+  /** Knopf, mit dem der Fahrer den Hinweis bestaetigt. */
+  verstanden: string;
+  /** "Bestaetigt 12:44" */
+  bestaetigt: string;
+  /** Ueberschrift, wenn die Tour geaendert wurde. */
+  tourGeaendert: string;
+  /** Ueberschrift, wenn Dokumente verlangt werden. */
+  dokumenteGefragt: string;
+  /** Knopf zum Hochladen (Kamera/Datei). */
+  dokumentHochladen: string;
+  /** Laeuft gerade hoch. */
+  laedtHoch: string;
+  /** "hochgeladen" hinter dem Dateinamen. */
+  hochgeladen: string;
+  /** Upload fehlgeschlagen. */
+  hochladenFehler: string;
+  /** Knopf: Push-Benachrichtigungen einschalten. */
+  benachrichtigungenAn: string;
+  /** Zustand: Push ist aktiv. */
+  benachrichtigungenAktiv: string;
+  /** Push vom Browser abgelehnt. */
+  benachrichtigungenGesperrt: string;
 }
 
 const TEXTE: Record<DriverLanguage, Bausteine> = {
@@ -114,6 +140,18 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBeendet: 'Tour beendet', stand: 'Stand',
     linkAbgelaufen: 'Dieser Link ist abgelaufen', linkUngueltig: 'Link ungültig',
     nichtAbrufbar: 'Daten gerade nicht abrufbar', plan: 'Plan', route: 'Route', mitfahrt: 'Mitfahrt', laden: 'Be-/Entladen', warten: 'Warten',
+    hinweis: 'Hinweis',
+    verstanden: 'Verstanden',
+    bestaetigt: 'Bestätigt',
+    tourGeaendert: 'Tour geändert',
+    dokumenteGefragt: 'Bitte Dokumente hochladen',
+    dokumentHochladen: 'Foto / Dokument hochladen',
+    laedtHoch: 'Wird hochgeladen …',
+    hochgeladen: 'hochgeladen',
+    hochladenFehler: 'Hochladen fehlgeschlagen, bitte noch einmal',
+    benachrichtigungenAn: 'Benachrichtigungen einschalten',
+    benachrichtigungenAktiv: 'Benachrichtigungen aktiv',
+    benachrichtigungenGesperrt: 'Benachrichtigungen im Browser gesperrt',
   },
   uk: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водій',
@@ -136,6 +174,18 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBeendet: 'Маршрут завершено', stand: 'Станом на',
     linkAbgelaufen: 'Це посилання застаріло', linkUngueltig: 'Недійсне посилання',
     nichtAbrufbar: 'Дані зараз недоступні', plan: 'план', route: 'Маршрут', mitfahrt: 'Пасажиром у', laden: 'Завант./розвант.', warten: 'Очікування',
+    hinweis: 'Повідомлення',
+    verstanden: 'Зрозуміло',
+    bestaetigt: 'Підтверджено',
+    tourGeaendert: 'Тур змінено',
+    dokumenteGefragt: 'Будь ласка, завантажте документи',
+    dokumentHochladen: 'Завантажити фото / документ',
+    laedtHoch: 'Завантаження …',
+    hochgeladen: 'завантажено',
+    hochladenFehler: 'Не вдалося завантажити, спробуйте ще раз',
+    benachrichtigungenAn: 'Увімкнути сповіщення',
+    benachrichtigungenAktiv: 'Сповіщення увімкнено',
+    benachrichtigungenGesperrt: 'Сповіщення заблоковані в браузері',
   },
   ru: {
     tour: 'Маршрут', datum: 'Дата', fahrer: 'Водитель',
@@ -158,6 +208,18 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBeendet: 'Маршрут завершён', stand: 'По состоянию на',
     linkAbgelaufen: 'Эта ссылка устарела', linkUngueltig: 'Недействительная ссылка',
     nichtAbrufbar: 'Данные сейчас недоступны', plan: 'план', route: 'Маршрут', mitfahrt: 'Пассажиром в', laden: 'Погрузка/выгрузка', warten: 'Ожидание',
+    hinweis: 'Сообщение',
+    verstanden: 'Понятно',
+    bestaetigt: 'Подтверждено',
+    tourGeaendert: 'Тур изменён',
+    dokumenteGefragt: 'Пожалуйста, загрузите документы',
+    dokumentHochladen: 'Загрузить фото / документ',
+    laedtHoch: 'Загрузка …',
+    hochgeladen: 'загружено',
+    hochladenFehler: 'Не удалось загрузить, попробуйте ещё раз',
+    benachrichtigungenAn: 'Включить уведомления',
+    benachrichtigungenAktiv: 'Уведомления включены',
+    benachrichtigungenGesperrt: 'Уведомления заблокированы в браузере',
   },
   pl: {
     tour: 'Trasa', datum: 'Data', fahrer: 'Kierowca',
@@ -180,6 +242,18 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBeendet: 'Trasa zakończona', stand: 'Stan na',
     linkAbgelaufen: 'Ten link wygasł', linkUngueltig: 'Nieprawidłowy link',
     nichtAbrufbar: 'Dane chwilowo niedostępne', plan: 'plan', route: 'Trasa', mitfahrt: 'Jako pasażer w', laden: 'Załad./rozład.', warten: 'Oczekiwanie',
+    hinweis: 'Wiadomość',
+    verstanden: 'Zrozumiałem',
+    bestaetigt: 'Potwierdzono',
+    tourGeaendert: 'Trasa zmieniona',
+    dokumenteGefragt: 'Proszę przesłać dokumenty',
+    dokumentHochladen: 'Prześlij zdjęcie / dokument',
+    laedtHoch: 'Przesyłanie …',
+    hochgeladen: 'przesłano',
+    hochladenFehler: 'Przesyłanie nie powiodło się, spróbuj ponownie',
+    benachrichtigungenAn: 'Włącz powiadomienia',
+    benachrichtigungenAktiv: 'Powiadomienia włączone',
+    benachrichtigungenGesperrt: 'Powiadomienia zablokowane w przeglądarce',
   },
   en: {
     tour: 'Tour', datum: 'Date', fahrer: 'Driver',
@@ -202,6 +276,18 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     tourBeendet: 'Tour finished', stand: 'As of',
     linkAbgelaufen: 'This link has expired', linkUngueltig: 'Invalid link',
     nichtAbrufbar: 'Data currently unavailable', plan: 'plan', route: 'Route', mitfahrt: 'Passenger in', laden: 'Load/unload', warten: 'Waiting',
+    hinweis: 'Message',
+    verstanden: 'Understood',
+    bestaetigt: 'Confirmed',
+    tourGeaendert: 'Tour changed',
+    dokumenteGefragt: 'Please upload documents',
+    dokumentHochladen: 'Upload photo / document',
+    laedtHoch: 'Uploading …',
+    hochgeladen: 'uploaded',
+    hochladenFehler: 'Upload failed, please try again',
+    benachrichtigungenAn: 'Enable notifications',
+    benachrichtigungenAktiv: 'Notifications on',
+    benachrichtigungenGesperrt: 'Notifications blocked in the browser',
   },
 };
 
