@@ -280,6 +280,8 @@ export interface Tour {
    * selbst.
    */
   here_via_points?: boolean | null;
+  /** Letzter Abruf der Fahrerseite; juenger als eine Minute heisst: sie ist gerade offen. */
+  driver_seen_at?: string | null;
   date: string | null;
   start_time: string | null;
   status: TourStatus;
