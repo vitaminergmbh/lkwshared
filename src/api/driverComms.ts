@@ -202,6 +202,43 @@ export async function sendNoticePush(noticeId: string): Promise<{ sent: number; 
 
 // ---------------------------------------------------------------- Push-Abos
 
+export interface PushDevice {
+  id: string;
+  user_agent: string | null;
+  created_at: string;
+  last_used_at: string | null;
+}
+
+/** Alle Push-Geraete eines Fahrers, juengstes zuerst. */
+export async function listPushSubscriptions(driverId: string): Promise<PushDevice[]> {
+  const { data, error } = await getSupabase()
+    .from('push_subscriptions')
+    .select('id, user_agent, created_at, last_used_at')
+    .eq('driver_id', driverId)
+    .is('failed_at', null)
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as PushDevice[];
+}
+
+/** Ein Geraet entfernen, etwa den eigenen Test-Browser. Der Browser selbst merkt nichts; er bekommt nur nichts mehr. */
+export async function deletePushSubscription(id: string): Promise<void> {
+  const { error } = await getSupabase().from('push_subscriptions').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Kurzname eines Geraets aus dem User-Agent: "Android · Chrome",
+ * "iPhone · Safari", "Windows · Chrome". Genug, um das eigene vom
+ * Fahrerhandy zu unterscheiden.
+ */
+export function describeUserAgent(ua: string | null | undefined): string {
+  if (!ua) return 'Gerät';
+  const system = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : 'Gerät';
+  const browser = /Edg\//.test(ua) ? 'Edge' : /SamsungBrowser/.test(ua) ? 'Samsung' : /Firefox/.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : '';
+  return browser ? `${system} · ${browser}` : system;
+}
+
 /** Wie viele Browser des Fahrers Push angenommen haben (0 = kein Push moeglich). */
 export async function countPushSubscriptions(driverId: string): Promise<number> {
   const { count, error } = await getSupabase()

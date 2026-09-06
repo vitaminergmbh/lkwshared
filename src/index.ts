@@ -53,7 +53,7 @@ export * as ServiceLogAPI from './api/serviceLog';
 export * as OdometerAPI from './api/odometer';
 export * as ShortLinkAPI from './api/shortLinks';
 export * as DriverCommsAPI from './api/driverComms';
-export type { DriverTourRelease, DriverNotice, DriverNoticeKind, DriverDocument } from './api/driverComms';
+export type { DriverTourRelease, DriverNotice, DriverNoticeKind, DriverDocument, PushDevice } from './api/driverComms';
 export { vergleicheFreigabe, aenderungenFreigabe, formatAenderung } from './utils/releaseDiff';
 export type { FreigabeStand, FreigabeStop, FreigabeTour, FreigabeVergleichOptionen, Aenderung, AenderungsDetails } from './utils/releaseDiff';
 
