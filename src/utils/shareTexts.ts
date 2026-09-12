@@ -150,6 +150,19 @@ interface Bausteine {
   /** Bitte, die Seite zu oeffnen und die Tour zu bestaetigen. */
   kurzBestaetigen: string;
 
+  // --- Tankkarte (Blatt in der Kopfzeile) ---
+  tankkarte: string;
+  pinAnzeigen: string;
+  /** "ausblenden in 12 s" — Restlaufzeit der sichtbaren PIN. */
+  ausblendenIn: (sekunden: number) => string;
+  /** Umschalter: das Fahrzeug, das der Fahrer gerade faehrt. */
+  jetzt: string;
+  /** Umschalter: ein spaeteres Fahrzeug, "ab Stop 3 · Leuna". */
+  abStop: (nr: number, name: string) => string;
+  gueltigBis: string;
+  karteImFahrzeug: string;
+  pinGemeldet: string;
+
   // --- Aenderungen seit der Freigabe (formatAenderung) ---
   aDatum: string;
   aStartzeit: string;
@@ -212,6 +225,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     alleAnzeigen: (n) => `Alle ${n} anzeigen`, wenigerAnzeigen: 'Weniger anzeigen',
     stopsAnzahl: (n) => `${n} Stops`,
     start: 'Start', inZeit: (d) => `in ${d}`, seitZeit: (d) => `seit ${d} überfällig`, kurzLink: 'Deine Tour, immer aktuell:', kurzBestaetigen: 'Bitte öffnen und die Tour bestätigen.',
+    tankkarte: 'Tankkarte', pinAnzeigen: 'PIN anzeigen', ausblendenIn: (s) => `ausblenden in ${s} s`, jetzt: 'jetzt', abStop: (n, name) => `ab Stop ${n} · ${name}`, gueltigBis: 'gültig bis', karteImFahrzeug: 'Karte liegt im Fahrzeug', pinGemeldet: 'Jede Anzeige der PIN wird der Disposition gemeldet.',
     aDatum: 'Datum',
     aStartzeit: 'Startzeit',
     aStartfahrzeug: 'Startfahrzeug',
@@ -270,6 +284,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     alleAnzeigen: (n) => `Показати всі (${n})`, wenigerAnzeigen: 'Менше',
     stopsAnzahl: (n) => `${n} зупинок`,
     start: 'Старт', inZeit: (d) => `через ${d}`, seitZeit: (d) => `запізнення ${d}`, kurzLink: 'Твій тур, завжди актуальний:', kurzBestaetigen: 'Відкрий і підтверди тур.',
+    tankkarte: 'Паливна картка', pinAnzeigen: 'Показати PIN', ausblendenIn: (s) => `сховати через ${s} с`, jetzt: 'зараз', abStop: (n, name) => `зі стопу ${n} · ${name}`, gueltigBis: 'дійсна до', karteImFahrzeug: 'Картка лежить у машині', pinGemeldet: 'Кожен показ PIN повідомляється диспетчеру.',
     aDatum: 'Дата',
     aStartzeit: 'Час старту',
     aStartfahrzeug: 'Стартовий автомобіль',
@@ -328,6 +343,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     alleAnzeigen: (n) => `Показать все (${n})`, wenigerAnzeigen: 'Меньше',
     stopsAnzahl: (n) => `${n} остановок`,
     start: 'Старт', inZeit: (d) => `через ${d}`, seitZeit: (d) => `опоздание ${d}`, kurzLink: 'Твой тур, всегда актуальный:', kurzBestaetigen: 'Открой и подтверди тур.',
+    tankkarte: 'Топливная карта', pinAnzeigen: 'Показать PIN', ausblendenIn: (s) => `скрыть через ${s} с`, jetzt: 'сейчас', abStop: (n, name) => `со стопа ${n} · ${name}`, gueltigBis: 'действует до', karteImFahrzeug: 'Карта лежит в машине', pinGemeldet: 'Каждый показ PIN сообщается диспетчеру.',
     aDatum: 'Дата',
     aStartzeit: 'Время старта',
     aStartfahrzeug: 'Стартовый автомобиль',
@@ -386,6 +402,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     alleAnzeigen: (n) => `Pokaż wszystkie (${n})`, wenigerAnzeigen: 'Mniej',
     stopsAnzahl: (n) => `${n} przystanków`,
     start: 'Start', inZeit: (d) => `za ${d}`, seitZeit: (d) => `spóźnienie ${d}`, kurzLink: 'Twoja trasa, zawsze aktualna:', kurzBestaetigen: 'Otwórz i potwierdź trasę.',
+    tankkarte: 'Karta paliwowa', pinAnzeigen: 'Pokaż PIN', ausblendenIn: (s) => `ukryj za ${s} s`, jetzt: 'teraz', abStop: (n, name) => `od stopu ${n} · ${name}`, gueltigBis: 'ważna do', karteImFahrzeug: 'Karta jest w pojeździe', pinGemeldet: 'Każde wyświetlenie PIN jest zgłaszane dyspozycji.',
     aDatum: 'Data',
     aStartzeit: 'Godzina startu',
     aStartfahrzeug: 'Pojazd startowy',
@@ -444,6 +461,7 @@ const TEXTE: Record<DriverLanguage, Bausteine> = {
     alleAnzeigen: (n) => `Show all (${n})`, wenigerAnzeigen: 'Show less',
     stopsAnzahl: (n) => `${n} stops`,
     start: 'Start', inZeit: (d) => `in ${d}`, seitZeit: (d) => `${d} overdue`, kurzLink: 'Your tour, always up to date:', kurzBestaetigen: 'Open it and confirm the tour.',
+    tankkarte: 'Fuel card', pinAnzeigen: 'Show PIN', ausblendenIn: (s) => `hide in ${s} s`, jetzt: 'now', abStop: (n, name) => `from stop ${n} · ${name}`, gueltigBis: 'valid until', karteImFahrzeug: 'The card is in the vehicle', pinGemeldet: 'Every PIN reveal is reported to dispatch.',
     aDatum: 'Date',
     aStartzeit: 'Start time',
     aStartfahrzeug: 'Start vehicle',

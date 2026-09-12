@@ -53,6 +53,8 @@ export * as ServiceLogAPI from './api/serviceLog';
 export * as OdometerAPI from './api/odometer';
 export * as ShortLinkAPI from './api/shortLinks';
 export * as DriverCommsAPI from './api/driverComms';
+export * as FuelCardAPI from './api/fuelCards';
+export type { FuelCardMasked, FuelCardPatch } from './api/fuelCards';
 export type { DriverTourRelease, DriverNotice, DriverNoticeKind, DriverDocument, PushDevice } from './api/driverComms';
 export { vergleicheFreigabe, aenderungenFreigabe, formatAenderung } from './utils/releaseDiff';
 export type { FreigabeStand, FreigabeStop, FreigabeTour, FreigabeVergleichOptionen, Aenderung, AenderungsDetails } from './utils/releaseDiff';
