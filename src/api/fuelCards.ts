@@ -50,20 +50,32 @@ export async function getMaskedFuelCards(): Promise<FuelCardMasked[]> {
 /**
  * Anlegen oder aendern. Felder, die nicht im Patch stehen, bleiben wie sie
  * sind — so kann die Notiz geaendert werden, ohne die PIN neu zu tippen.
- * Kein `select()` danach: die Geheimnisse sind fuer diesen Schluessel nicht
- * lesbar, ein Rueckgabewunsch wuerde die Anfrage kippen.
+ *
+ * Kein Upsert: `ON CONFLICT DO UPDATE` braucht in Postgres Leserecht auf
+ * den gesetzten Spalten, und genau das hat dieser Schluessel fuer PIN und
+ * Kartennummer nicht (42501). Deshalb erst UPDATE (liest nur truck_id),
+ * und wenn keine Zeile getroffen wurde, ein einfaches INSERT.
  */
 export async function upsertFuelCard(truckId: string, patch: FuelCardPatch): Promise<void> {
-  const zeile: Record<string, unknown> = { truck_id: truckId, updated_at: new Date().toISOString() };
-  if (patch.provider !== undefined) zeile.provider = patch.provider;
-  if (patch.card_number !== undefined) zeile.card_number = patch.card_number;
-  if (patch.pin !== undefined) zeile.pin = patch.pin;
-  if (patch.valid_until !== undefined) zeile.valid_until = patch.valid_until;
-  if (patch.note !== undefined) zeile.note = patch.note;
-  const { error } = await getSupabase()
+  const felder: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (patch.provider !== undefined) felder.provider = patch.provider;
+  if (patch.card_number !== undefined) felder.card_number = patch.card_number;
+  if (patch.pin !== undefined) felder.pin = patch.pin;
+  if (patch.valid_until !== undefined) felder.valid_until = patch.valid_until;
+  if (patch.note !== undefined) felder.note = patch.note;
+
+  const { data: getroffen, error: updErr } = await getSupabase()
     .from('truck_fuel_cards')
-    .upsert(zeile, { onConflict: 'truck_id' });
-  if (error) throw new Error(error.message);
+    .update(felder)
+    .eq('truck_id', truckId)
+    .select('truck_id');
+  if (updErr) throw new Error(updErr.message);
+  if ((getroffen ?? []).length > 0) return;
+
+  const { error: insErr } = await getSupabase()
+    .from('truck_fuel_cards')
+    .insert({ truck_id: truckId, ...felder });
+  if (insErr) throw new Error(insErr.message);
 }
 
 export async function deleteFuelCard(truckId: string): Promise<void> {
