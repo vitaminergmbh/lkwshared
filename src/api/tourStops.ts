@@ -56,6 +56,28 @@ export async function updateTourStop(
   return updated;
 }
 
+/**
+ * Verschiebt einen Stop in eine andere Tour — per UPDATE auf tour_id/stop_order,
+ * NICHT durch Loeschen+Neuanlegen. Die ID bleibt dabei stabil, sodass alle
+ * Felder (Beladungsnotizen, Paletten, ...) automatisch erhalten bleiben und
+ * keine zwischenzeitlich laufende Neuberechnung der Quelltour versehentlich
+ * eine wiederverwendete ID trifft.
+ */
+export async function moveTourStop(
+  id: string,
+  tourId: string,
+  stopOrder: number
+): Promise<TourStop> {
+  const { data: updated, error } = await getSupabase()
+    .from('tour_stops')
+    .update({ tour_id: tourId, stop_order: stopOrder })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return updated;
+}
+
 export async function deleteTourStop(id: string): Promise<void> {
   const { error } = await getSupabase()
     .from('tour_stops')
