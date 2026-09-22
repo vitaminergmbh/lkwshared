@@ -97,7 +97,11 @@ export async function duplicateTour(id: string): Promise<Tour | null> {
       start_time: original.start_time,
       status: 'draft' as TourStatus,
       return_to_depot: original.return_to_depot,
-      depot_id: original.depot_id,
+      // depot_id wird unten erst gesetzt, NACHDEM die Stops kopiert sind, und
+      // nur wenn der erste kopierte Stop wirklich das Depot ist — sonst
+      // entsteht die Kopie mit einem unsichtbaren Depot-Feld ohne passenden
+      // Stop (Tour "hat" ein Depot, das aber nirgends als Stop auftaucht).
+      depot_id: null,
       driver_initial_drive_time: original.driver_initial_drive_time,
       total_duration: null,
       total_distance: null,
@@ -142,13 +146,32 @@ export async function duplicateTour(id: string): Promise<Tour | null> {
       time_window_ok: true,
       break_needed_before: false,
       truck_id: stop.truck_id,
+      ride_along: stop.ride_along,
       checked: false,
+      notes: stop.notes,
+      load_note: stop.load_note,
+      unload_note: stop.unload_note,
+      pallets_load: stop.pallets_load,
+      pallets_unload: stop.pallets_unload,
     }));
 
     const { error: insertError } = await supabase
       .from('tour_stops')
       .insert(newStops);
     if (insertError) throw new Error(insertError.message);
+
+    // depot_id nur uebernehmen, wenn der erste kopierte Stop tatsaechlich das
+    // Depot ist — sonst bliebe die Kopie ohne sichtbaren Depot-Stop, aber mit
+    // dem Feld gesetzt (siehe Kommentar oben beim Tour-Insert).
+    const firstStop = stops[0];
+    if (original.depot_id && firstStop?.location_id === original.depot_id) {
+      const { error: depotError } = await supabase
+        .from('tours')
+        .update({ depot_id: original.depot_id })
+        .eq('id', newTour.id);
+      if (depotError) throw new Error(depotError.message);
+      newTour.depot_id = original.depot_id;
+    }
   }
 
   return newTour;
