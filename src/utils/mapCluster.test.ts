@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { clusterPoints, boundsOf, zoomToSeparate } from './mapCluster.ts';
+import { clusterPoints, clusterZuordnung, boundsOf, zoomToSeparate } from './mapCluster.ts';
 import type { PixelPoint } from './mapCluster.ts';
 
 function p(id: string, x: number, y: number, lat = x, lng = y): PixelPoint {
@@ -60,6 +60,51 @@ test('Jeder Punkt landet in genau einem Cluster', () => {
   const alle = c.flatMap((x) => x.ids);
   assert.equal(alle.length, 20);
   assert.equal(new Set(alle).size, 20, 'kein Punkt doppelt');
+});
+
+test('Kein angezeigter Marker ueberdeckt einen anderen', () => {
+  // a zieht b an sich (Abstand 60), c liegt 70 von a entfernt und bleibt im
+  // Greedy-Schritt einzeln — der Mittelpunkt von a+b (x=30) liegt aber nur
+  // 40 von c entfernt. Frueher lagen dann zwei Marker aufeinander.
+  const c = clusterPoints([p('a', 0, 0), p('b', 60, 0), p('c', 70, 0)], 60);
+  assert.equal(c.length, 1);
+  assert.deepEqual(c[0]!.ids.sort(), ['a', 'b', 'c']);
+});
+
+test('Nach dem Zusammenlegen liegen alle Mittelpunkte weiter als der Radius auseinander', () => {
+  const punkte = Array.from({ length: 40 }, (_, i) => p(`t${String(i).padStart(2, '0')}`, (i * 37) % 300, (i * 53) % 280));
+  const c = clusterPoints(punkte, 64);
+  const mitte = c.map((g) => {
+    const m = punkte.filter((x) => g.ids.includes(x.id));
+    return { x: m.reduce((s, q) => s + q.x, 0) / m.length, y: m.reduce((s, q) => s + q.y, 0) / m.length };
+  });
+  for (let i = 0; i < mitte.length; i++) {
+    for (let j = i + 1; j < mitte.length; j++) {
+      assert.ok(Math.hypot(mitte[i]!.x - mitte[j]!.x, mitte[i]!.y - mitte[j]!.y) > 64);
+    }
+  }
+});
+
+test('Toleranz: vorher zusammen bleibt knapp ueber dem Radius zusammen', () => {
+  const erst = clusterPoints([p('a', 0, 0), p('b', 55, 0)], 60);
+  assert.equal(erst.length, 1);
+  // b faehrt 10 px weiter — ohne Toleranz wuerde die Gruppe aufbrechen.
+  const ohne = clusterPoints([p('a', 0, 0), p('b', 65, 0)], 60);
+  assert.equal(ohne.length, 2);
+  const mit = clusterPoints([p('a', 0, 0), p('b', 65, 0)], 60, { vorher: clusterZuordnung(erst) });
+  assert.equal(mit.length, 1, 'kein Flackern an der Grenze');
+});
+
+test('Toleranz gilt nicht fuer Punkte, die vorher getrennt waren', () => {
+  const erst = clusterPoints([p('a', 0, 0), p('b', 200, 0)], 60);
+  const dann = clusterPoints([p('a', 0, 0), p('b', 65, 0)], 60, { vorher: clusterZuordnung(erst) });
+  assert.equal(dann.length, 2);
+});
+
+test('Weit weg trennt sich auch eine vorherige Gruppe', () => {
+  const erst = clusterPoints([p('a', 0, 0), p('b', 10, 0)], 60);
+  const dann = clusterPoints([p('a', 0, 0), p('b', 200, 0)], 60, { vorher: clusterZuordnung(erst) });
+  assert.equal(dann.length, 2);
 });
 
 test('Ohne Punkte gibt es keine Cluster', () => {

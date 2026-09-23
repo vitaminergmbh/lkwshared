@@ -63,7 +63,7 @@ export type { FreigabeStand, FreigabeStop, FreigabeTour, FreigabeVergleichOption
 export { computeTourLoad } from './utils/palletLoad';
 
 // === Karten-Cluster ===
-export { clusterPoints, boundsOf, zoomToSeparate } from './utils/mapCluster';
+export { clusterPoints, clusterZuordnung, boundsOf, zoomToSeparate } from './utils/mapCluster';
 
 // === HERE WeGo ===
 export { buildHereRouteUrl, buildHereStopUrl, formatVehicleDimensions } from './utils/hereDeeplink';
@@ -76,7 +76,7 @@ export { splitIntoLoads, checkLoads, numberLoadsOfDay, activeTruckIdAt, splitByT
 export { shareTexts, formatDurationIn, isDriverLanguage, DRIVER_LANGUAGES } from './utils/shareTexts';
 export type { DriverLanguage } from './utils/shareTexts';
 export type { LoadStop, TourLoad, LoadCheck } from './utils/tourLoads';
-export type { PixelPoint, PointCluster } from './utils/mapCluster';
+export type { PixelPoint, PointCluster, ClusterOptions } from './utils/mapCluster';
 export type { StopLoad, TourLoadResult } from './utils/palletLoad';
 
 // === Utils ===
