@@ -20,6 +20,8 @@ export interface Location {
   latitude: number;
   longitude: number;
   loading_time: number; // Minutes
+  /** Standard-Wartezeit in Minuten (z.B. REWE-Lager 60); wird beim Einfuegen in den Stop kopiert. */
+  wait_time?: number;
   notes: string | null;
   is_depot: boolean;
   tags: string[];
