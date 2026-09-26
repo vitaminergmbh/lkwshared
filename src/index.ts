@@ -7,6 +7,7 @@ export type {
   TourStatus,
   TruckStatus,
   Location,
+  StandortTelefon,
   LocationHours,
   Truck,
   Driver,

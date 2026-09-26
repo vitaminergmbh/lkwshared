@@ -13,6 +13,12 @@ export type TruckStatus = 'online' | 'stale' | 'offline';
 
 // === Location ===
 
+export interface StandortTelefon {
+  /** Freitext, z.B. "Wareneingang Trocken", "Schichtleiter". */
+  bezeichnung: string;
+  nummer: string;
+}
+
 export interface Location {
   id: string;
   name: string;
@@ -24,6 +30,8 @@ export interface Location {
   wait_time?: number;
   /** Hinweis zur Zeitfenster-Buchung, z.B. "Transporeon, bis 16:00 Uhr am Vortag". */
   buchung_hinweis?: string | null;
+  /** Telefonnummern, z.B. Wareneingang Obst/Gemüse, Schichtleiter, Zeitfenster-Buchung. */
+  telefon?: StandortTelefon[];
   notes: string | null;
   is_depot: boolean;
   tags: string[];
