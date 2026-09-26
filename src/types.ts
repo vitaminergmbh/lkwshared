@@ -22,6 +22,8 @@ export interface Location {
   loading_time: number; // Minutes
   /** Standard-Wartezeit in Minuten (z.B. REWE-Lager 60); wird beim Einfuegen in den Stop kopiert. */
   wait_time?: number;
+  /** Hinweis zur Zeitfenster-Buchung, z.B. "Transporeon, bis 16:00 Uhr am Vortag". */
+  buchung_hinweis?: string | null;
   notes: string | null;
   is_depot: boolean;
   tags: string[];
